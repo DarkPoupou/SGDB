@@ -19,6 +19,7 @@ export interface IEmployeesClient {
     getEmployees(): Observable<EmployeeRoleDto[]>;
     createEmployee(command: CreateEmployeeCommand): Observable<boolean>;
     deleteEmployee(id: number | undefined): Observable<boolean>;
+    updateEmployee(command: UpdateEmployeeCommand): Observable<FileResponse>;
 }
 
 @Injectable({
@@ -240,6 +241,56 @@ export class EmployeesClient implements IEmployeesClient {
             }));
         }
         return _observableOf<boolean>(<any>null);
+    }
+
+    updateEmployee(command: UpdateEmployeeCommand): Observable<FileResponse> {
+        let url_ = this.baseUrl + "/api/Employees";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(command);
+
+        let options_ : any = {
+            body: content_,
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Content-Type": "application/json",
+                "Accept": "application/octet-stream"
+            })
+        };
+
+        return this.http.request("put", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processUpdateEmployee(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processUpdateEmployee(<any>response_);
+                } catch (e) {
+                    return <Observable<FileResponse>><any>_observableThrow(e);
+                }
+            } else
+                return <Observable<FileResponse>><any>_observableThrow(response_);
+        }));
+    }
+
+    protected processUpdateEmployee(response: HttpResponseBase): Observable<FileResponse> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (<any>response).error instanceof Blob ? (<any>response).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200 || status === 206) {
+            const contentDisposition = response.headers ? response.headers.get("content-disposition") : undefined;
+            const fileNameMatch = contentDisposition ? /filename="?([^"]*?)"?(;|$)/g.exec(contentDisposition) : undefined;
+            const fileName = fileNameMatch && fileNameMatch.length > 1 ? fileNameMatch[1] : undefined;
+            return _observableOf({ fileName: fileName, data: <any>responseBlob, status: status, headers: _headers });
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf<FileResponse>(<any>null);
     }
 }
 
@@ -876,6 +927,88 @@ export class TodoListsClient implements ITodoListsClient {
     }
 }
 
+export interface IVehiclesClient {
+    getavailableVehicles(startDate: Date | undefined, endate: Date | undefined, depotId: number | undefined): Observable<VehicleDto[]>;
+}
+
+@Injectable({
+    providedIn: 'root'
+})
+export class VehiclesClient implements IVehiclesClient {
+    private http: HttpClient;
+    private baseUrl: string;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
+
+    constructor(@Inject(HttpClient) http: HttpClient, @Optional() @Inject(API_BASE_URL) baseUrl?: string) {
+        this.http = http;
+        this.baseUrl = baseUrl !== undefined && baseUrl !== null ? baseUrl : "";
+    }
+
+    getavailableVehicles(startDate: Date | undefined, endate: Date | undefined, depotId: number | undefined): Observable<VehicleDto[]> {
+        let url_ = this.baseUrl + "/api/Vehicles?";
+        if (startDate === null)
+            throw new Error("The parameter 'startDate' cannot be null.");
+        else if (startDate !== undefined)
+            url_ += "startDate=" + encodeURIComponent(startDate ? "" + startDate.toJSON() : "") + "&";
+        if (endate === null)
+            throw new Error("The parameter 'endate' cannot be null.");
+        else if (endate !== undefined)
+            url_ += "endate=" + encodeURIComponent(endate ? "" + endate.toJSON() : "") + "&";
+        if (depotId === null)
+            throw new Error("The parameter 'depotId' cannot be null.");
+        else if (depotId !== undefined)
+            url_ += "depotId=" + encodeURIComponent("" + depotId) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Accept": "application/json"
+            })
+        };
+
+        return this.http.request("get", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processGetavailableVehicles(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processGetavailableVehicles(<any>response_);
+                } catch (e) {
+                    return <Observable<VehicleDto[]>><any>_observableThrow(e);
+                }
+            } else
+                return <Observable<VehicleDto[]>><any>_observableThrow(response_);
+        }));
+    }
+
+    protected processGetavailableVehicles(response: HttpResponseBase): Observable<VehicleDto[]> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (<any>response).error instanceof Blob ? (<any>response).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            if (Array.isArray(resultData200)) {
+                result200 = [] as any;
+                for (let item of resultData200)
+                    result200!.push(VehicleDto.fromJS(item));
+            }
+            return _observableOf(result200);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf<VehicleDto[]>(<any>null);
+    }
+}
+
 export interface IWeatherForecastClient {
     get(): Observable<WeatherForecast[]>;
 }
@@ -1128,6 +1261,54 @@ export interface ICreateEmployeeCommand {
     lastname?: string;
     mail?: string;
     password?: string;
+}
+
+export class UpdateEmployeeCommand implements IUpdateEmployeeCommand {
+    id?: number;
+    firstname?: string;
+    lastname?: string;
+    mail?: string;
+
+    constructor(data?: IUpdateEmployeeCommand) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.id = _data["id"];
+            this.firstname = _data["firstname"];
+            this.lastname = _data["lastname"];
+            this.mail = _data["mail"];
+        }
+    }
+
+    static fromJS(data: any): UpdateEmployeeCommand {
+        data = typeof data === 'object' ? data : {};
+        let result = new UpdateEmployeeCommand();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id;
+        data["firstname"] = this.firstname;
+        data["lastname"] = this.lastname;
+        data["mail"] = this.mail;
+        return data; 
+    }
+}
+
+export interface IUpdateEmployeeCommand {
+    id?: number;
+    firstname?: string;
+    lastname?: string;
+    mail?: string;
 }
 
 export class PaginatedListOfTodoItemBriefDto implements IPaginatedListOfTodoItemBriefDto {
@@ -1663,6 +1844,142 @@ export class UpdateTodoListCommand implements IUpdateTodoListCommand {
 export interface IUpdateTodoListCommand {
     id?: number;
     title?: string | undefined;
+}
+
+export class VehicleDto implements IVehicleDto {
+    id?: number;
+    immatriculation?: string;
+    notoriety?: NotorietyDto;
+    brand?: BrandDto;
+
+    constructor(data?: IVehicleDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.id = _data["id"];
+            this.immatriculation = _data["immatriculation"];
+            this.notoriety = _data["notoriety"] ? NotorietyDto.fromJS(_data["notoriety"]) : <any>undefined;
+            this.brand = _data["brand"] ? BrandDto.fromJS(_data["brand"]) : <any>undefined;
+        }
+    }
+
+    static fromJS(data: any): VehicleDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new VehicleDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id;
+        data["immatriculation"] = this.immatriculation;
+        data["notoriety"] = this.notoriety ? this.notoriety.toJSON() : <any>undefined;
+        data["brand"] = this.brand ? this.brand.toJSON() : <any>undefined;
+        return data; 
+    }
+}
+
+export interface IVehicleDto {
+    id?: number;
+    immatriculation?: string;
+    notoriety?: NotorietyDto;
+    brand?: BrandDto;
+}
+
+export class NotorietyDto implements INotorietyDto {
+    id?: number;
+    name?: string;
+    coefficient?: number;
+
+    constructor(data?: INotorietyDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.id = _data["id"];
+            this.name = _data["name"];
+            this.coefficient = _data["coefficient"];
+        }
+    }
+
+    static fromJS(data: any): NotorietyDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new NotorietyDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id;
+        data["name"] = this.name;
+        data["coefficient"] = this.coefficient;
+        return data; 
+    }
+}
+
+export interface INotorietyDto {
+    id?: number;
+    name?: string;
+    coefficient?: number;
+}
+
+export class BrandDto implements IBrandDto {
+    id?: number;
+    name?: string;
+    model?: string;
+
+    constructor(data?: IBrandDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.id = _data["id"];
+            this.name = _data["name"];
+            this.model = _data["model"];
+        }
+    }
+
+    static fromJS(data: any): BrandDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new BrandDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id;
+        data["name"] = this.name;
+        data["model"] = this.model;
+        return data; 
+    }
+}
+
+export interface IBrandDto {
+    id?: number;
+    name?: string;
+    model?: string;
 }
 
 export class WeatherForecast implements IWeatherForecast {
