@@ -6,6 +6,52 @@
     "version": "1.0.0"
   },
   "paths": {
+    "/api/Clients": {
+      "get": {
+        "tags": [
+          "Clients"
+        ],
+        "operationId": "Clients_GetClients",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ClientDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Depots": {
+      "get": {
+        "tags": [
+          "Depots"
+        ],
+        "operationId": "Depots_GetDepots",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DepotDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/Employees/Id": {
       "get": {
         "tags": [
@@ -659,6 +705,64 @@
   },
   "components": {
     "schemas": {
+      "ClientDto": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "lastName": {
+            "type": "string"
+          },
+          "firstname": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          }
+        }
+      },
+      "DepotDto": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "name": {
+            "type": "string"
+          },
+          "address": {
+            "type": "string"
+          },
+          "city": {
+            "type": "string"
+          },
+          "country": {
+            "$ref": "#/components/schemas/CountryNameDto"
+          },
+          "vehiclesCount": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "CountryNameDto": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      },
       "EmployeeDto": {
         "type": "object",
         "additionalProperties": false,

@@ -14,6 +14,146 @@ import { HttpClient, HttpHeaders, HttpResponse, HttpResponseBase } from '@angula
 
 export const API_BASE_URL = new InjectionToken<string>('API_BASE_URL');
 
+export interface IClientsClient {
+    getClients(): Observable<ClientDto[]>;
+}
+
+@Injectable({
+    providedIn: 'root'
+})
+export class ClientsClient implements IClientsClient {
+    private http: HttpClient;
+    private baseUrl: string;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
+
+    constructor(@Inject(HttpClient) http: HttpClient, @Optional() @Inject(API_BASE_URL) baseUrl?: string) {
+        this.http = http;
+        this.baseUrl = baseUrl !== undefined && baseUrl !== null ? baseUrl : "";
+    }
+
+    getClients(): Observable<ClientDto[]> {
+        let url_ = this.baseUrl + "/api/Clients";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Accept": "application/json"
+            })
+        };
+
+        return this.http.request("get", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processGetClients(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processGetClients(<any>response_);
+                } catch (e) {
+                    return <Observable<ClientDto[]>><any>_observableThrow(e);
+                }
+            } else
+                return <Observable<ClientDto[]>><any>_observableThrow(response_);
+        }));
+    }
+
+    protected processGetClients(response: HttpResponseBase): Observable<ClientDto[]> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (<any>response).error instanceof Blob ? (<any>response).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            if (Array.isArray(resultData200)) {
+                result200 = [] as any;
+                for (let item of resultData200)
+                    result200!.push(ClientDto.fromJS(item));
+            }
+            return _observableOf(result200);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf<ClientDto[]>(<any>null);
+    }
+}
+
+export interface IDepotsClient {
+    getDepots(): Observable<DepotDto[]>;
+}
+
+@Injectable({
+    providedIn: 'root'
+})
+export class DepotsClient implements IDepotsClient {
+    private http: HttpClient;
+    private baseUrl: string;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
+
+    constructor(@Inject(HttpClient) http: HttpClient, @Optional() @Inject(API_BASE_URL) baseUrl?: string) {
+        this.http = http;
+        this.baseUrl = baseUrl !== undefined && baseUrl !== null ? baseUrl : "";
+    }
+
+    getDepots(): Observable<DepotDto[]> {
+        let url_ = this.baseUrl + "/api/Depots";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Accept": "application/json"
+            })
+        };
+
+        return this.http.request("get", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processGetDepots(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processGetDepots(<any>response_);
+                } catch (e) {
+                    return <Observable<DepotDto[]>><any>_observableThrow(e);
+                }
+            } else
+                return <Observable<DepotDto[]>><any>_observableThrow(response_);
+        }));
+    }
+
+    protected processGetDepots(response: HttpResponseBase): Observable<DepotDto[]> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (<any>response).error instanceof Blob ? (<any>response).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            if (Array.isArray(resultData200)) {
+                result200 = [] as any;
+                for (let item of resultData200)
+                    result200!.push(DepotDto.fromJS(item));
+            }
+            return _observableOf(result200);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf<DepotDto[]>(<any>null);
+    }
+}
+
 export interface IEmployeesClient {
     getEmployeeById(employeeId: number | undefined): Observable<EmployeeDto>;
     getEmployees(): Observable<EmployeeRoleDto[]>;
@@ -1077,6 +1217,150 @@ export class WeatherForecastClient implements IWeatherForecastClient {
         }
         return _observableOf<WeatherForecast[]>(<any>null);
     }
+}
+
+export class ClientDto implements IClientDto {
+    id?: number;
+    lastName?: string;
+    firstname?: string;
+    email?: string;
+
+    constructor(data?: IClientDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.id = _data["id"];
+            this.lastName = _data["lastName"];
+            this.firstname = _data["firstname"];
+            this.email = _data["email"];
+        }
+    }
+
+    static fromJS(data: any): ClientDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new ClientDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id;
+        data["lastName"] = this.lastName;
+        data["firstname"] = this.firstname;
+        data["email"] = this.email;
+        return data; 
+    }
+}
+
+export interface IClientDto {
+    id?: number;
+    lastName?: string;
+    firstname?: string;
+    email?: string;
+}
+
+export class DepotDto implements IDepotDto {
+    id?: number;
+    name?: string;
+    address?: string;
+    city?: string;
+    country?: CountryNameDto;
+    vehiclesCount?: number;
+
+    constructor(data?: IDepotDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.id = _data["id"];
+            this.name = _data["name"];
+            this.address = _data["address"];
+            this.city = _data["city"];
+            this.country = _data["country"] ? CountryNameDto.fromJS(_data["country"]) : <any>undefined;
+            this.vehiclesCount = _data["vehiclesCount"];
+        }
+    }
+
+    static fromJS(data: any): DepotDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new DepotDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id;
+        data["name"] = this.name;
+        data["address"] = this.address;
+        data["city"] = this.city;
+        data["country"] = this.country ? this.country.toJSON() : <any>undefined;
+        data["vehiclesCount"] = this.vehiclesCount;
+        return data; 
+    }
+}
+
+export interface IDepotDto {
+    id?: number;
+    name?: string;
+    address?: string;
+    city?: string;
+    country?: CountryNameDto;
+    vehiclesCount?: number;
+}
+
+export class CountryNameDto implements ICountryNameDto {
+    id?: number;
+    name?: string;
+
+    constructor(data?: ICountryNameDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.id = _data["id"];
+            this.name = _data["name"];
+        }
+    }
+
+    static fromJS(data: any): CountryNameDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new CountryNameDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id;
+        data["name"] = this.name;
+        return data; 
+    }
+}
+
+export interface ICountryNameDto {
+    id?: number;
+    name?: string;
 }
 
 export class EmployeeDto implements IEmployeeDto {
