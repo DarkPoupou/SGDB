@@ -12,4 +12,5 @@ public class Reservation
     public ReservationStatus ReservationStatus { get; set; }
     public DateTime StartDate { get; set; }
     public DateTime EndDate { get; set; }
+    public double Kilometers { get; set; } = 0;
 }

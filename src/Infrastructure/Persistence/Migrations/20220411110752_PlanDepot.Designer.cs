@@ -4,6 +4,7 @@ using CleanArchitecture.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CleanArchitecture.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20220411110752_PlanDepot")]
+    partial class PlanDepot
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -268,9 +270,6 @@ namespace CleanArchitecture.Infrastructure.Persistence.Migrations
                     b.Property<DateTime>("EndDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<double>("Kilometers")
-                        .HasColumnType("float");
-
                     b.Property<int>("PlanId")
                         .HasColumnType("int");
 
@@ -290,7 +289,8 @@ namespace CleanArchitecture.Infrastructure.Persistence.Migrations
                     b.HasIndex("PlanId")
                         .IsUnique();
 
-                    b.HasIndex("VehicleId");
+                    b.HasIndex("VehicleId")
+                        .IsUnique();
 
                     b.ToTable("Reservations");
                 });
@@ -408,6 +408,9 @@ namespace CleanArchitecture.Infrastructure.Persistence.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<double>("Kilometer")
+                        .HasColumnType("float");
+
+                    b.Property<double>("KilometerTraveled")
                         .HasColumnType("float");
 
                     b.Property<int>("NotorietyId")
@@ -852,8 +855,8 @@ namespace CleanArchitecture.Infrastructure.Persistence.Migrations
                         .IsRequired();
 
                     b.HasOne("CleanArchitecture.Domain.Entities.Vehicle", "Vehicle")
-                        .WithMany("Reservations")
-                        .HasForeignKey("VehicleId")
+                        .WithOne("Reservation")
+                        .HasForeignKey("CleanArchitecture.Domain.Entities.Reservation", "VehicleId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
@@ -1031,7 +1034,8 @@ namespace CleanArchitecture.Infrastructure.Persistence.Migrations
 
             modelBuilder.Entity("CleanArchitecture.Domain.Entities.Vehicle", b =>
                 {
-                    b.Navigation("Reservations");
+                    b.Navigation("Reservation")
+                        .IsRequired();
                 });
 #pragma warning restore 612, 618
         }

@@ -3,9 +3,8 @@
 public class Vehicle
 {
     public int Id { get; set; }
-    public Reservation Reservation{ get; set; }
+    public ICollection<Reservation> Reservations{ get; set; }
     public string Immatriculation { get; set; }
-    public double KilometerTraveled { get; set; }
     public double Kilometer { get; set; }
     public Notoriety Notoriety { get; set; }
     public int NotorietyId { get; set; }
