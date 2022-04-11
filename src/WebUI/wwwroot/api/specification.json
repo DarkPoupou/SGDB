@@ -27,6 +27,36 @@
             }
           }
         }
+      },
+      "post": {
+        "tags": [
+          "Clients"
+        ],
+        "operationId": "Clients_CreateClient",
+        "requestBody": {
+          "x-name": "command",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddClientCommand"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 1
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/api/Depots": {
@@ -720,6 +750,21 @@
             "type": "string"
           },
           "email": {
+            "type": "string"
+          }
+        }
+      },
+      "AddClientCommand": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "lastname": {
+            "type": "string"
+          },
+          "firstname": {
+            "type": "string"
+          },
+          "eMail": {
             "type": "string"
           }
         }
