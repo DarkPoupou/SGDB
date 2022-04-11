@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace CleanArchitecture.WebUI.Controllers;
 public class ClientsController : ApiControllerBase
 {
+    [HttpGet]
     public async Task<IEnumerable<ClientDto>> GetClients()
     {
         return await Mediator.Send(new GetClientsQuery());
