@@ -12,6 +12,7 @@ public class ReserveVehicleCommandValidator: AbstractValidator<ReserveVehicleCom
 {
     public ReserveVehicleCommandValidator(IDepotService depotService)
     {
+        RuleFor(x => x.PlanType).NotNull().NotEmpty().IsInEnum();
         RuleFor(x => x.VehicleId).GreaterThan(0);
         RuleFor(x => x.StartDepotId).GreaterThan(0);
         RuleFor(x => x.EndDepotId.Value).GreaterThan(0).When(x => x.PlanType == PlanType.Fee);

@@ -13,7 +13,6 @@ public interface IApplicationDbContext
     DbSet<Reservation> Reservations { get; }
     DbSet<Client> Clients { get; }
     DbSet<Vehicle> Vehicles { get; }
-    DbSet<BonusRate> BonusRates { get; }
     DbSet<Plan> Plans { get; }  
     DbSet<Brand> Brands { get; }
     DbSet<Notoriety> Notorieties { get; }

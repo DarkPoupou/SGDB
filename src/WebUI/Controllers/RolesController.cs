@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace CleanArchitecture.WebUI.Controllers;
 public class RolesController : ApiControllerBase
 {
-
+    [HttpGet]
     public async Task<IEnumerable<RoleDto>> GetRoles()
     {
         return await Mediator.Send(new GetRolesQuery());

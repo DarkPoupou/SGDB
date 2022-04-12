@@ -19,17 +19,17 @@ public class EmployeesController : ApiControllerBase
     {
         return await Mediator.Send(new GetEmployeesQuery());
     }
-    [HttpPost]
+    [HttpPost("Create")]
     public async Task<ActionResult<bool>> CreateEmployee(CreateEmployeeCommand command)
     {
         return await Mediator.Send(command);
     }
-    [HttpDelete]
+    [HttpDelete("delete")]
     public async Task<ActionResult<bool>> DeleteEmployee(int id)
     {
         return await Mediator.Send(new DeleteEmployeeCommand { EmployeeId = id });
     }
-    [HttpPut]
+    [HttpPut("Update")]
     public async Task<ActionResult> UpdateEmployee(UpdateEmployeeCommand command)
     {
         await Mediator.Send(command);

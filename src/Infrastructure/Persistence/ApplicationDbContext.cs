@@ -36,7 +36,6 @@ public class ApplicationDbContext : ApiAuthorizationDbContext<ApplicationUser>, 
     public DbSet<Reservation> Reservations => Set<Reservation>();
     public DbSet<Client> Clients => Set<Client>();
     public DbSet<Vehicle> Vehicles => Set<Vehicle>();
-    public DbSet<BonusRate> BonusRates => Set<BonusRate>();
     public DbSet<Plan> Plans => Set<Plan>();
     public DbSet<Brand> Brands => Set<Brand>();
     public DbSet<Notoriety> Notorieties => Set<Notoriety>();

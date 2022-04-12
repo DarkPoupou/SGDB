@@ -13,4 +13,5 @@ public class Reservation
     public DateTime StartDate { get; set; }
     public DateTime EndDate { get; set; }
     public double Kilometers { get; set; } = 0;
+    public double Price { get; set; }
 }

@@ -44,6 +44,7 @@ public static class DependencyInjection
         services.AddTransient<IIdentityService, IdentityService>();
         services.AddTransient<ICsvFileBuilder, CsvFileBuilder>();
         services.AddTransient<IDepotService, DepotService>();
+        services.AddTransient<IReservationCalculService, ReservationCalculService>();
 
         services.AddAuthentication()
             .AddIdentityServerJwt();
