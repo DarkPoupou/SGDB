@@ -9,4 +9,5 @@ namespace CleanArchitecture.Application.Common.Interfaces;
 public interface IDepotService
 {
     public bool IsFeesDepot1First(ISimpleDepotComparableModel depot1, ISimpleDepotComparableModel depot2);
+    public Task<bool> IsFeeExist(int depot1Id, int depot2Id);    
 }

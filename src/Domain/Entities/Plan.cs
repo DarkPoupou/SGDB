@@ -11,4 +11,5 @@ public class Plan
     public int StartDepotId { get; set; }
     public Depot EndDepot { get; set; }
     public int EndDepotId { get; set; }
+    public double? KilometerPrice { get; set; }
 }
