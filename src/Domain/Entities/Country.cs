@@ -1,5 +1,7 @@
-﻿namespace CleanArchitecture.Domain.Entities;
+﻿using Microsoft.EntityFrameworkCore;
 
+namespace CleanArchitecture.Domain.Entities;
+[Index(nameof(Name), IsUnique=true)]
 public class Country
 {
     public int Id { get; set; }
