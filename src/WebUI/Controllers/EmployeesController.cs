@@ -19,7 +19,7 @@ public class EmployeesController : ApiControllerBase
     {
         return await Mediator.Send(new GetEmployeesQuery());
     }
-    [HttpPost("Create")]
+    [HttpPost]
     public async Task<ActionResult<bool>> CreateEmployee(CreateEmployeeCommand command)
     {
         return await Mediator.Send(command);
@@ -29,7 +29,7 @@ public class EmployeesController : ApiControllerBase
     {
         return await Mediator.Send(new DeleteEmployeeCommand { EmployeeId = id });
     }
-    [HttpPut("Update")]
+    [HttpPut]
     public async Task<ActionResult> UpdateEmployee(UpdateEmployeeCommand command)
     {
         await Mediator.Send(command);

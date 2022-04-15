@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
+using CleanArchitecture.Application.Common.Exceptions;
 using CleanArchitecture.Application.Common.Interfaces;
 using CleanArchitecture.Application.Employees.Models;
 using MediatR;
@@ -30,6 +31,6 @@ public class GetEmployeeByIdQueryHandler : IRequestHandler<GetEmployeeByIdQuery,
         return await _context.Employees
             .ProjectTo<EmployeeDto>(_mapper.ConfigurationProvider)
             .FirstOrDefaultAsync(e => e.Id == request.EmployeeId)
-            ?? throw new ArgumentNullException("no employee found with id: " + request.EmployeeId);
+            ?? throw new NotFoundException("no employee found with id: " + request.EmployeeId);
     }
 }

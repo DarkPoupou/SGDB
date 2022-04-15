@@ -24,7 +24,7 @@ public class AddClientCommandHandler : IRequestHandler<AddClientCommand, bool>
     }
     public async Task<bool> Handle(AddClientCommand request, CancellationToken cancellationToken)
     {
-        Client client = new() { Email = request.EMail, LastName = request.Lastname, Firstname = request.firstname };
+        Client client = new() { Email = request.EMail, LastName = request.Lastname, Firstname = request.firstname, Password = $"{request.Lastname}.{request.firstname}" };
 
         _context.Clients.Add(client);
         return await _context.SaveChangesAsync(cancellationToken) > 0;

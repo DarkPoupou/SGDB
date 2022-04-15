@@ -1,5 +1,5 @@
 {
-  "x-generator": "NSwag v13.9.4.0 (NJsonSchema v10.3.1.0 (Newtonsoft.Json v13.0.0.0))",
+  "x-generator": "NSwag v13.9.4.0 (NJsonSchema v10.3.1.0 (Newtonsoft.Json v9.0.0.0))",
   "openapi": "3.0.0",
   "info": {
     "title": "CleanArchitecture API",
@@ -165,6 +165,39 @@
           }
         }
       },
+      "put": {
+        "tags": [
+          "Employees"
+        ],
+        "operationId": "Employees_UpdateEmployee",
+        "requestBody": {
+          "x-name": "command",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateEmployeeCommand"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 1
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Employees/delete": {
       "delete": {
         "tags": [
           "Employees"
@@ -193,18 +226,54 @@
             }
           }
         }
-      },
-      "put": {
+      }
+    },
+    "/api/Reservation/Id": {
+      "get": {
         "tags": [
-          "Employees"
+          "Reservation"
         ],
-        "operationId": "Employees_UpdateEmployee",
+        "operationId": "Reservation_GetReservationsbyClientId",
+        "parameters": [
+          {
+            "name": "clientId",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "x-position": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ReservationDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Reservation": {
+      "post": {
+        "tags": [
+          "Reservation"
+        ],
+        "operationId": "Reservation_ReserveVehicle",
         "requestBody": {
           "x-name": "command",
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/UpdateEmployeeCommand"
+                "$ref": "#/components/schemas/ReserveVehicleCommand"
               }
             }
           },
@@ -215,10 +284,50 @@
           "200": {
             "description": "",
             "content": {
-              "application/octet-stream": {
+              "application/json": {
                 "schema": {
-                  "type": "string",
-                  "format": "binary"
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Reservation/close": {
+      "get": {
+        "tags": [
+          "Reservation"
+        ],
+        "operationId": "Reservation_CloseReservation",
+        "parameters": [
+          {
+            "name": "reservationId",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "x-position": 1
+          },
+          {
+            "name": "NbKilometers",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            },
+            "x-position": 2
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CloseReservationDto"
                 }
               }
             }
@@ -895,6 +1004,210 @@
           }
         }
       },
+      "ReservationDto": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "vehicle": {
+            "$ref": "#/components/schemas/VehicleDto"
+          },
+          "reservationStatus": {
+            "$ref": "#/components/schemas/ReservationStatus"
+          },
+          "startDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "endDate": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "VehicleDto": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "immatriculation": {
+            "type": "string"
+          },
+          "brand": {
+            "$ref": "#/components/schemas/BrandDto"
+          }
+        }
+      },
+      "BrandDto": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "name": {
+            "type": "string"
+          },
+          "model": {
+            "type": "string"
+          }
+        }
+      },
+      "ReservationStatus": {
+        "type": "integer",
+        "description": "",
+        "x-enumNames": [
+          "Booked",
+          "Pending",
+          "Comlpeted",
+          "Cancelled"
+        ],
+        "enum": [
+          0,
+          1,
+          2,
+          3
+        ]
+      },
+      "ReserveVehicleCommand": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "startDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "endDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "planType": {
+            "$ref": "#/components/schemas/PlanType"
+          },
+          "vehicleId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "startDepotId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "endDepotId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "clientId": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "PlanType": {
+        "type": "integer",
+        "description": "",
+        "x-enumNames": [
+          "Kilometric",
+          "Fee"
+        ],
+        "enum": [
+          0,
+          1
+        ]
+      },
+      "CloseReservationDto": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "client": {
+            "$ref": "#/components/schemas/ClientDto"
+          },
+          "clientId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "vehicle": {
+            "$ref": "#/components/schemas/VehicleDto"
+          },
+          "vehicleId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "plan": {
+            "$ref": "#/components/schemas/PlanDto"
+          },
+          "planId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "reservationStatus": {
+            "$ref": "#/components/schemas/ReservationStatus"
+          },
+          "startDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "endDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "kilometers": {
+            "type": "number",
+            "format": "double"
+          },
+          "price": {
+            "type": "number",
+            "format": "double"
+          }
+        }
+      },
+      "PlanDto": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "bonusRate": {
+            "type": "number",
+            "format": "double"
+          },
+          "planType": {
+            "$ref": "#/components/schemas/PlanType"
+          },
+          "startDepot": {
+            "$ref": "#/components/schemas/DepotDto"
+          },
+          "startDepotId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "endDepot": {
+            "$ref": "#/components/schemas/DepotDto"
+          },
+          "endDepotId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "kilometerPrice": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          }
+        }
+      },
       "PaginatedListOfTodoItemBriefDto": {
         "type": "object",
         "additionalProperties": false,
@@ -1120,58 +1433,6 @@
           "title": {
             "type": "string",
             "nullable": true
-          }
-        }
-      },
-      "VehicleDto": {
-        "type": "object",
-        "additionalProperties": false,
-        "properties": {
-          "id": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "immatriculation": {
-            "type": "string"
-          },
-          "notoriety": {
-            "$ref": "#/components/schemas/NotorietyDto"
-          },
-          "brand": {
-            "$ref": "#/components/schemas/BrandDto"
-          }
-        }
-      },
-      "NotorietyDto": {
-        "type": "object",
-        "additionalProperties": false,
-        "properties": {
-          "id": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "name": {
-            "type": "string"
-          },
-          "coefficient": {
-            "type": "number",
-            "format": "double"
-          }
-        }
-      },
-      "BrandDto": {
-        "type": "object",
-        "additionalProperties": false,
-        "properties": {
-          "id": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "name": {
-            "type": "string"
-          },
-          "model": {
-            "type": "string"
           }
         }
       },

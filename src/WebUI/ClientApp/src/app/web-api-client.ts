@@ -211,8 +211,8 @@ export interface IEmployeesClient {
     getEmployeeById(employeeId: number | undefined): Observable<EmployeeDto>;
     getEmployees(): Observable<EmployeeRoleDto[]>;
     createEmployee(command: CreateEmployeeCommand): Observable<boolean>;
-    deleteEmployee(id: number | undefined): Observable<boolean>;
     updateEmployee(command: UpdateEmployeeCommand): Observable<FileResponse>;
+    deleteEmployee(id: number | undefined): Observable<boolean>;
 }
 
 @Injectable({
@@ -384,8 +384,58 @@ export class EmployeesClient implements IEmployeesClient {
         return _observableOf<boolean>(<any>null);
     }
 
+    updateEmployee(command: UpdateEmployeeCommand): Observable<FileResponse> {
+        let url_ = this.baseUrl + "/api/Employees";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(command);
+
+        let options_ : any = {
+            body: content_,
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Content-Type": "application/json",
+                "Accept": "application/octet-stream"
+            })
+        };
+
+        return this.http.request("put", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processUpdateEmployee(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processUpdateEmployee(<any>response_);
+                } catch (e) {
+                    return <Observable<FileResponse>><any>_observableThrow(e);
+                }
+            } else
+                return <Observable<FileResponse>><any>_observableThrow(response_);
+        }));
+    }
+
+    protected processUpdateEmployee(response: HttpResponseBase): Observable<FileResponse> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (<any>response).error instanceof Blob ? (<any>response).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200 || status === 206) {
+            const contentDisposition = response.headers ? response.headers.get("content-disposition") : undefined;
+            const fileNameMatch = contentDisposition ? /filename="?([^"]*?)"?(;|$)/g.exec(contentDisposition) : undefined;
+            const fileName = fileNameMatch && fileNameMatch.length > 1 ? fileNameMatch[1] : undefined;
+            return _observableOf({ fileName: fileName, data: <any>responseBlob, status: status, headers: _headers });
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf<FileResponse>(<any>null);
+    }
+
     deleteEmployee(id: number | undefined): Observable<boolean> {
-        let url_ = this.baseUrl + "/api/Employees?";
+        let url_ = this.baseUrl + "/api/Employees/delete?";
         if (id === null)
             throw new Error("The parameter 'id' cannot be null.");
         else if (id !== undefined)
@@ -435,9 +485,85 @@ export class EmployeesClient implements IEmployeesClient {
         }
         return _observableOf<boolean>(<any>null);
     }
+}
 
-    updateEmployee(command: UpdateEmployeeCommand): Observable<FileResponse> {
-        let url_ = this.baseUrl + "/api/Employees";
+export interface IReservationClient {
+    getReservationsbyClientId(clientId: number | undefined): Observable<ReservationDto[]>;
+    reserveVehicle(command: ReserveVehicleCommand): Observable<boolean>;
+    closeReservation(reservationId: number | undefined, nbKilometers: number | undefined): Observable<CloseReservationDto>;
+}
+
+@Injectable({
+    providedIn: 'root'
+})
+export class ReservationClient implements IReservationClient {
+    private http: HttpClient;
+    private baseUrl: string;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
+
+    constructor(@Inject(HttpClient) http: HttpClient, @Optional() @Inject(API_BASE_URL) baseUrl?: string) {
+        this.http = http;
+        this.baseUrl = baseUrl !== undefined && baseUrl !== null ? baseUrl : "";
+    }
+
+    getReservationsbyClientId(clientId: number | undefined): Observable<ReservationDto[]> {
+        let url_ = this.baseUrl + "/api/Reservation/Id?";
+        if (clientId === null)
+            throw new Error("The parameter 'clientId' cannot be null.");
+        else if (clientId !== undefined)
+            url_ += "clientId=" + encodeURIComponent("" + clientId) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Accept": "application/json"
+            })
+        };
+
+        return this.http.request("get", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processGetReservationsbyClientId(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processGetReservationsbyClientId(<any>response_);
+                } catch (e) {
+                    return <Observable<ReservationDto[]>><any>_observableThrow(e);
+                }
+            } else
+                return <Observable<ReservationDto[]>><any>_observableThrow(response_);
+        }));
+    }
+
+    protected processGetReservationsbyClientId(response: HttpResponseBase): Observable<ReservationDto[]> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (<any>response).error instanceof Blob ? (<any>response).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            if (Array.isArray(resultData200)) {
+                result200 = [] as any;
+                for (let item of resultData200)
+                    result200!.push(ReservationDto.fromJS(item));
+            }
+            return _observableOf(result200);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf<ReservationDto[]>(<any>null);
+    }
+
+    reserveVehicle(command: ReserveVehicleCommand): Observable<boolean> {
+        let url_ = this.baseUrl + "/api/Reservation";
         url_ = url_.replace(/[?&]$/, "");
 
         const content_ = JSON.stringify(command);
@@ -448,42 +574,100 @@ export class EmployeesClient implements IEmployeesClient {
             responseType: "blob",
             headers: new HttpHeaders({
                 "Content-Type": "application/json",
-                "Accept": "application/octet-stream"
+                "Accept": "application/json"
             })
         };
 
-        return this.http.request("put", url_, options_).pipe(_observableMergeMap((response_ : any) => {
-            return this.processUpdateEmployee(response_);
+        return this.http.request("post", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processReserveVehicle(response_);
         })).pipe(_observableCatch((response_: any) => {
             if (response_ instanceof HttpResponseBase) {
                 try {
-                    return this.processUpdateEmployee(<any>response_);
+                    return this.processReserveVehicle(<any>response_);
                 } catch (e) {
-                    return <Observable<FileResponse>><any>_observableThrow(e);
+                    return <Observable<boolean>><any>_observableThrow(e);
                 }
             } else
-                return <Observable<FileResponse>><any>_observableThrow(response_);
+                return <Observable<boolean>><any>_observableThrow(response_);
         }));
     }
 
-    protected processUpdateEmployee(response: HttpResponseBase): Observable<FileResponse> {
+    protected processReserveVehicle(response: HttpResponseBase): Observable<boolean> {
         const status = response.status;
         const responseBlob =
             response instanceof HttpResponse ? response.body :
             (<any>response).error instanceof Blob ? (<any>response).error : undefined;
 
         let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
-        if (status === 200 || status === 206) {
-            const contentDisposition = response.headers ? response.headers.get("content-disposition") : undefined;
-            const fileNameMatch = contentDisposition ? /filename="?([^"]*?)"?(;|$)/g.exec(contentDisposition) : undefined;
-            const fileName = fileNameMatch && fileNameMatch.length > 1 ? fileNameMatch[1] : undefined;
-            return _observableOf({ fileName: fileName, data: <any>responseBlob, status: status, headers: _headers });
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = resultData200 !== undefined ? resultData200 : <any>null;
+            return _observableOf(result200);
+            }));
         } else if (status !== 200 && status !== 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
             return throwException("An unexpected server error occurred.", status, _responseText, _headers);
             }));
         }
-        return _observableOf<FileResponse>(<any>null);
+        return _observableOf<boolean>(<any>null);
+    }
+
+    closeReservation(reservationId: number | undefined, nbKilometers: number | undefined): Observable<CloseReservationDto> {
+        let url_ = this.baseUrl + "/api/Reservation/close?";
+        if (reservationId === null)
+            throw new Error("The parameter 'reservationId' cannot be null.");
+        else if (reservationId !== undefined)
+            url_ += "reservationId=" + encodeURIComponent("" + reservationId) + "&";
+        if (nbKilometers === null)
+            throw new Error("The parameter 'nbKilometers' cannot be null.");
+        else if (nbKilometers !== undefined)
+            url_ += "NbKilometers=" + encodeURIComponent("" + nbKilometers) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Accept": "application/json"
+            })
+        };
+
+        return this.http.request("get", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processCloseReservation(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processCloseReservation(<any>response_);
+                } catch (e) {
+                    return <Observable<CloseReservationDto>><any>_observableThrow(e);
+                }
+            } else
+                return <Observable<CloseReservationDto>><any>_observableThrow(response_);
+        }));
+    }
+
+    protected processCloseReservation(response: HttpResponseBase): Observable<CloseReservationDto> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (<any>response).error instanceof Blob ? (<any>response).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = CloseReservationDto.fromJS(resultData200);
+            return _observableOf(result200);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf<CloseReservationDto>(<any>null);
     }
 }
 
@@ -1692,6 +1876,362 @@ export interface IUpdateEmployeeCommand {
     mail?: string;
 }
 
+export class ReservationDto implements IReservationDto {
+    id?: number;
+    vehicle?: VehicleDto;
+    reservationStatus?: ReservationStatus;
+    startDate?: Date;
+    endDate?: Date;
+
+    constructor(data?: IReservationDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.id = _data["id"];
+            this.vehicle = _data["vehicle"] ? VehicleDto.fromJS(_data["vehicle"]) : <any>undefined;
+            this.reservationStatus = _data["reservationStatus"];
+            this.startDate = _data["startDate"] ? new Date(_data["startDate"].toString()) : <any>undefined;
+            this.endDate = _data["endDate"] ? new Date(_data["endDate"].toString()) : <any>undefined;
+        }
+    }
+
+    static fromJS(data: any): ReservationDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new ReservationDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id;
+        data["vehicle"] = this.vehicle ? this.vehicle.toJSON() : <any>undefined;
+        data["reservationStatus"] = this.reservationStatus;
+        data["startDate"] = this.startDate ? this.startDate.toISOString() : <any>undefined;
+        data["endDate"] = this.endDate ? this.endDate.toISOString() : <any>undefined;
+        return data; 
+    }
+}
+
+export interface IReservationDto {
+    id?: number;
+    vehicle?: VehicleDto;
+    reservationStatus?: ReservationStatus;
+    startDate?: Date;
+    endDate?: Date;
+}
+
+export class VehicleDto implements IVehicleDto {
+    id?: number;
+    immatriculation?: string;
+    brand?: BrandDto;
+
+    constructor(data?: IVehicleDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.id = _data["id"];
+            this.immatriculation = _data["immatriculation"];
+            this.brand = _data["brand"] ? BrandDto.fromJS(_data["brand"]) : <any>undefined;
+        }
+    }
+
+    static fromJS(data: any): VehicleDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new VehicleDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id;
+        data["immatriculation"] = this.immatriculation;
+        data["brand"] = this.brand ? this.brand.toJSON() : <any>undefined;
+        return data; 
+    }
+}
+
+export interface IVehicleDto {
+    id?: number;
+    immatriculation?: string;
+    brand?: BrandDto;
+}
+
+export class BrandDto implements IBrandDto {
+    id?: number;
+    name?: string;
+    model?: string;
+
+    constructor(data?: IBrandDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.id = _data["id"];
+            this.name = _data["name"];
+            this.model = _data["model"];
+        }
+    }
+
+    static fromJS(data: any): BrandDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new BrandDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id;
+        data["name"] = this.name;
+        data["model"] = this.model;
+        return data; 
+    }
+}
+
+export interface IBrandDto {
+    id?: number;
+    name?: string;
+    model?: string;
+}
+
+export enum ReservationStatus {
+    Booked = 0,
+    Pending = 1,
+    Comlpeted = 2,
+    Cancelled = 3,
+}
+
+export class ReserveVehicleCommand implements IReserveVehicleCommand {
+    startDate?: Date;
+    endDate?: Date;
+    planType?: PlanType;
+    vehicleId?: number;
+    startDepotId?: number;
+    endDepotId?: number | undefined;
+    clientId?: number;
+
+    constructor(data?: IReserveVehicleCommand) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.startDate = _data["startDate"] ? new Date(_data["startDate"].toString()) : <any>undefined;
+            this.endDate = _data["endDate"] ? new Date(_data["endDate"].toString()) : <any>undefined;
+            this.planType = _data["planType"];
+            this.vehicleId = _data["vehicleId"];
+            this.startDepotId = _data["startDepotId"];
+            this.endDepotId = _data["endDepotId"];
+            this.clientId = _data["clientId"];
+        }
+    }
+
+    static fromJS(data: any): ReserveVehicleCommand {
+        data = typeof data === 'object' ? data : {};
+        let result = new ReserveVehicleCommand();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["startDate"] = this.startDate ? this.startDate.toISOString() : <any>undefined;
+        data["endDate"] = this.endDate ? this.endDate.toISOString() : <any>undefined;
+        data["planType"] = this.planType;
+        data["vehicleId"] = this.vehicleId;
+        data["startDepotId"] = this.startDepotId;
+        data["endDepotId"] = this.endDepotId;
+        data["clientId"] = this.clientId;
+        return data; 
+    }
+}
+
+export interface IReserveVehicleCommand {
+    startDate?: Date;
+    endDate?: Date;
+    planType?: PlanType;
+    vehicleId?: number;
+    startDepotId?: number;
+    endDepotId?: number | undefined;
+    clientId?: number;
+}
+
+export enum PlanType {
+    Kilometric = 0,
+    Fee = 1,
+}
+
+export class CloseReservationDto implements ICloseReservationDto {
+    id?: number;
+    client?: ClientDto;
+    clientId?: number;
+    vehicle?: VehicleDto;
+    vehicleId?: number;
+    plan?: PlanDto;
+    planId?: number;
+    reservationStatus?: ReservationStatus;
+    startDate?: Date;
+    endDate?: Date;
+    kilometers?: number;
+    price?: number;
+
+    constructor(data?: ICloseReservationDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.id = _data["id"];
+            this.client = _data["client"] ? ClientDto.fromJS(_data["client"]) : <any>undefined;
+            this.clientId = _data["clientId"];
+            this.vehicle = _data["vehicle"] ? VehicleDto.fromJS(_data["vehicle"]) : <any>undefined;
+            this.vehicleId = _data["vehicleId"];
+            this.plan = _data["plan"] ? PlanDto.fromJS(_data["plan"]) : <any>undefined;
+            this.planId = _data["planId"];
+            this.reservationStatus = _data["reservationStatus"];
+            this.startDate = _data["startDate"] ? new Date(_data["startDate"].toString()) : <any>undefined;
+            this.endDate = _data["endDate"] ? new Date(_data["endDate"].toString()) : <any>undefined;
+            this.kilometers = _data["kilometers"];
+            this.price = _data["price"];
+        }
+    }
+
+    static fromJS(data: any): CloseReservationDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new CloseReservationDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id;
+        data["client"] = this.client ? this.client.toJSON() : <any>undefined;
+        data["clientId"] = this.clientId;
+        data["vehicle"] = this.vehicle ? this.vehicle.toJSON() : <any>undefined;
+        data["vehicleId"] = this.vehicleId;
+        data["plan"] = this.plan ? this.plan.toJSON() : <any>undefined;
+        data["planId"] = this.planId;
+        data["reservationStatus"] = this.reservationStatus;
+        data["startDate"] = this.startDate ? this.startDate.toISOString() : <any>undefined;
+        data["endDate"] = this.endDate ? this.endDate.toISOString() : <any>undefined;
+        data["kilometers"] = this.kilometers;
+        data["price"] = this.price;
+        return data; 
+    }
+}
+
+export interface ICloseReservationDto {
+    id?: number;
+    client?: ClientDto;
+    clientId?: number;
+    vehicle?: VehicleDto;
+    vehicleId?: number;
+    plan?: PlanDto;
+    planId?: number;
+    reservationStatus?: ReservationStatus;
+    startDate?: Date;
+    endDate?: Date;
+    kilometers?: number;
+    price?: number;
+}
+
+export class PlanDto implements IPlanDto {
+    id?: number;
+    bonusRate?: number;
+    planType?: PlanType;
+    startDepot?: DepotDto;
+    startDepotId?: number;
+    endDepot?: DepotDto;
+    endDepotId?: number;
+    kilometerPrice?: number | undefined;
+
+    constructor(data?: IPlanDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.id = _data["id"];
+            this.bonusRate = _data["bonusRate"];
+            this.planType = _data["planType"];
+            this.startDepot = _data["startDepot"] ? DepotDto.fromJS(_data["startDepot"]) : <any>undefined;
+            this.startDepotId = _data["startDepotId"];
+            this.endDepot = _data["endDepot"] ? DepotDto.fromJS(_data["endDepot"]) : <any>undefined;
+            this.endDepotId = _data["endDepotId"];
+            this.kilometerPrice = _data["kilometerPrice"];
+        }
+    }
+
+    static fromJS(data: any): PlanDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new PlanDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id;
+        data["bonusRate"] = this.bonusRate;
+        data["planType"] = this.planType;
+        data["startDepot"] = this.startDepot ? this.startDepot.toJSON() : <any>undefined;
+        data["startDepotId"] = this.startDepotId;
+        data["endDepot"] = this.endDepot ? this.endDepot.toJSON() : <any>undefined;
+        data["endDepotId"] = this.endDepotId;
+        data["kilometerPrice"] = this.kilometerPrice;
+        return data; 
+    }
+}
+
+export interface IPlanDto {
+    id?: number;
+    bonusRate?: number;
+    planType?: PlanType;
+    startDepot?: DepotDto;
+    startDepotId?: number;
+    endDepot?: DepotDto;
+    endDepotId?: number;
+    kilometerPrice?: number | undefined;
+}
+
 export class PaginatedListOfTodoItemBriefDto implements IPaginatedListOfTodoItemBriefDto {
     items?: TodoItemBriefDto[];
     pageNumber?: number;
@@ -2225,142 +2765,6 @@ export class UpdateTodoListCommand implements IUpdateTodoListCommand {
 export interface IUpdateTodoListCommand {
     id?: number;
     title?: string | undefined;
-}
-
-export class VehicleDto implements IVehicleDto {
-    id?: number;
-    immatriculation?: string;
-    notoriety?: NotorietyDto;
-    brand?: BrandDto;
-
-    constructor(data?: IVehicleDto) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (<any>this)[property] = (<any>data)[property];
-            }
-        }
-    }
-
-    init(_data?: any) {
-        if (_data) {
-            this.id = _data["id"];
-            this.immatriculation = _data["immatriculation"];
-            this.notoriety = _data["notoriety"] ? NotorietyDto.fromJS(_data["notoriety"]) : <any>undefined;
-            this.brand = _data["brand"] ? BrandDto.fromJS(_data["brand"]) : <any>undefined;
-        }
-    }
-
-    static fromJS(data: any): VehicleDto {
-        data = typeof data === 'object' ? data : {};
-        let result = new VehicleDto();
-        result.init(data);
-        return result;
-    }
-
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        data["id"] = this.id;
-        data["immatriculation"] = this.immatriculation;
-        data["notoriety"] = this.notoriety ? this.notoriety.toJSON() : <any>undefined;
-        data["brand"] = this.brand ? this.brand.toJSON() : <any>undefined;
-        return data; 
-    }
-}
-
-export interface IVehicleDto {
-    id?: number;
-    immatriculation?: string;
-    notoriety?: NotorietyDto;
-    brand?: BrandDto;
-}
-
-export class NotorietyDto implements INotorietyDto {
-    id?: number;
-    name?: string;
-    coefficient?: number;
-
-    constructor(data?: INotorietyDto) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (<any>this)[property] = (<any>data)[property];
-            }
-        }
-    }
-
-    init(_data?: any) {
-        if (_data) {
-            this.id = _data["id"];
-            this.name = _data["name"];
-            this.coefficient = _data["coefficient"];
-        }
-    }
-
-    static fromJS(data: any): NotorietyDto {
-        data = typeof data === 'object' ? data : {};
-        let result = new NotorietyDto();
-        result.init(data);
-        return result;
-    }
-
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        data["id"] = this.id;
-        data["name"] = this.name;
-        data["coefficient"] = this.coefficient;
-        return data; 
-    }
-}
-
-export interface INotorietyDto {
-    id?: number;
-    name?: string;
-    coefficient?: number;
-}
-
-export class BrandDto implements IBrandDto {
-    id?: number;
-    name?: string;
-    model?: string;
-
-    constructor(data?: IBrandDto) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (<any>this)[property] = (<any>data)[property];
-            }
-        }
-    }
-
-    init(_data?: any) {
-        if (_data) {
-            this.id = _data["id"];
-            this.name = _data["name"];
-            this.model = _data["model"];
-        }
-    }
-
-    static fromJS(data: any): BrandDto {
-        data = typeof data === 'object' ? data : {};
-        let result = new BrandDto();
-        result.init(data);
-        return result;
-    }
-
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        data["id"] = this.id;
-        data["name"] = this.name;
-        data["model"] = this.model;
-        return data; 
-    }
-}
-
-export interface IBrandDto {
-    id?: number;
-    name?: string;
-    model?: string;
 }
 
 export class WeatherForecast implements IWeatherForecast {
