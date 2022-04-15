@@ -29,7 +29,7 @@ public class GetdepotsQueryHandler : IRequestHandler<GetdepotsQuery, IEnumerable
         var depots = await _context.Depots.ProjectTo<DepotDto>(_mapper.ConfigurationProvider).ToListAsync();
         foreach (var depot in depots)
         {
-            depot.VehiclesCount =  _context.Depots.FindAsync(depot).Result?.Vehicle?.Count ?? 0;
+            depot.VehiclesCount =  _context.Depots.FindAsync(depot.Id).Result?.Vehicle?.Count ?? 0;
         }
         return depots;
     }
