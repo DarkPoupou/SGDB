@@ -55,6 +55,7 @@ public class CloseReservationCommandHandler : IRequestHandler<CloseReservationCo
             reservation.Plan.EndDepot = endDepot;
         }
         reservation.Price = price;
+        reservation.ReservationStatus = ReservationStatus.Comlpeted;
         await _context.SaveChangesAsync(cancellationToken);
         return await _context.Reservations.ProjectTo<CloseReservationDto>(_mapper.ConfigurationProvider).FirstOrDefaultAsync(f => f.Id == request.ReservationId)
             ?? throw new NotFoundException(nameof(request.ReservationId), request.ReservationId);    

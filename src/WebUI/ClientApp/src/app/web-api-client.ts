@@ -542,6 +542,7 @@ export interface IReservationClient {
     getReservationsbyClientId(clientId: number | undefined): Observable<ReservationDto[]>;
     reserveVehicle(command: ReserveVehicleCommand): Observable<boolean>;
     closeReservation(reservationId: number | undefined, nbKilometers: number | undefined): Observable<CloseReservationDto>;
+    startReservation(reservationId: number | undefined): Observable<boolean>;
 }
 
 @Injectable({
@@ -719,6 +720,58 @@ export class ReservationClient implements IReservationClient {
             }));
         }
         return _observableOf<CloseReservationDto>(<any>null);
+    }
+
+    startReservation(reservationId: number | undefined): Observable<boolean> {
+        let url_ = this.baseUrl + "/api/Reservation/start?";
+        if (reservationId === null)
+            throw new Error("The parameter 'reservationId' cannot be null.");
+        else if (reservationId !== undefined)
+            url_ += "reservationId=" + encodeURIComponent("" + reservationId) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Accept": "application/json"
+            })
+        };
+
+        return this.http.request("put", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processStartReservation(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processStartReservation(<any>response_);
+                } catch (e) {
+                    return <Observable<boolean>><any>_observableThrow(e);
+                }
+            } else
+                return <Observable<boolean>><any>_observableThrow(response_);
+        }));
+    }
+
+    protected processStartReservation(response: HttpResponseBase): Observable<boolean> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (<any>response).error instanceof Blob ? (<any>response).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = resultData200 !== undefined ? resultData200 : <any>null;
+            return _observableOf(result200);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf<boolean>(<any>null);
     }
 }
 
@@ -1933,6 +1986,10 @@ export class ReservationDto implements IReservationDto {
     reservationStatus?: ReservationStatus;
     startDate?: Date;
     endDate?: Date;
+    price?: number;
+    planPlanType?: PlanType;
+    planStartDepotId?: number;
+    planEndDepotId?: number;
 
     constructor(data?: IReservationDto) {
         if (data) {
@@ -1950,6 +2007,10 @@ export class ReservationDto implements IReservationDto {
             this.reservationStatus = _data["reservationStatus"];
             this.startDate = _data["startDate"] ? new Date(_data["startDate"].toString()) : <any>undefined;
             this.endDate = _data["endDate"] ? new Date(_data["endDate"].toString()) : <any>undefined;
+            this.price = _data["price"];
+            this.planPlanType = _data["planPlanType"];
+            this.planStartDepotId = _data["planStartDepotId"];
+            this.planEndDepotId = _data["planEndDepotId"];
         }
     }
 
@@ -1967,6 +2028,10 @@ export class ReservationDto implements IReservationDto {
         data["reservationStatus"] = this.reservationStatus;
         data["startDate"] = this.startDate ? this.startDate.toISOString() : <any>undefined;
         data["endDate"] = this.endDate ? this.endDate.toISOString() : <any>undefined;
+        data["price"] = this.price;
+        data["planPlanType"] = this.planPlanType;
+        data["planStartDepotId"] = this.planStartDepotId;
+        data["planEndDepotId"] = this.planEndDepotId;
         return data; 
     }
 }
@@ -1977,6 +2042,10 @@ export interface IReservationDto {
     reservationStatus?: ReservationStatus;
     startDate?: Date;
     endDate?: Date;
+    price?: number;
+    planPlanType?: PlanType;
+    planStartDepotId?: number;
+    planEndDepotId?: number;
 }
 
 export class VehicleDto implements IVehicleDto {
@@ -2068,10 +2137,15 @@ export interface IBrandDto {
 }
 
 export enum ReservationStatus {
-    Booked = 0,
-    Pending = 1,
-    Comlpeted = 2,
-    Cancelled = 3,
+    Booked = 1,
+    Pending = 2,
+    Comlpeted = 3,
+    Cancelled = 4,
+}
+
+export enum PlanType {
+    Kilometric = 1,
+    Fee = 2,
 }
 
 export class ReserveVehicleCommand implements IReserveVehicleCommand {
@@ -2132,11 +2206,6 @@ export interface IReserveVehicleCommand {
     startDepotId?: number;
     endDepotId?: number | undefined;
     clientId?: number;
-}
-
-export enum PlanType {
-    Kilometric = 1,
-    Fee = 2,
 }
 
 export class CloseReservationDto implements ICloseReservationDto {

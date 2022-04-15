@@ -21,4 +21,9 @@ public class ReservationController : ApiControllerBase
     {
         return await Mediator.Send(new CloseReservationCommand { NbKilometers = NbKilometers, ReservationId = reservationId });
     }
+    [HttpPut("start")]
+    public async Task<ActionResult<bool>> StartReservation(int reservationId)
+    {
+        return await Mediator.Send(new StartReservationCommand { ReservationId = reservationId });
+    }
 }

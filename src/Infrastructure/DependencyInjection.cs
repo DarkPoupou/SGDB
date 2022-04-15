@@ -36,7 +36,6 @@ public static class DependencyInjection
         services.AddTransient<IDateTime, DateTimeService>();
         services.AddTransient<ICsvFileBuilder, CsvFileBuilder>();
         services.AddTransient<IDepotService, DepotService>();
-        services.AddTransient<IReservationCalculService, ReservationCalculService>();
         services.AddTransient<IPriceCalculationService, PriceCalculationService>();
 
         services.AddAuthentication();

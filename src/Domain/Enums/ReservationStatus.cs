@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace CleanArchitecture.Domain.Enums;
 public enum ReservationStatus
 {
-    Booked,
+    Booked = 1,
     Pending,
     Comlpeted,
     Cancelled

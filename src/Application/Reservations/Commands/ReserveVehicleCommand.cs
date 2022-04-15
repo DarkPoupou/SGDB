@@ -25,13 +25,13 @@ public class ReserveVehicleCommandHandler : IRequestHandler<ReserveVehicleComman
 {
     private readonly IApplicationDbContext _context;
     private readonly IDateTime _dateTime;
-    private readonly IReservationCalculService _reservationService;
+    private readonly IPriceCalculationService _priceCalculation;
 
-    public ReserveVehicleCommandHandler(IApplicationDbContext context, IDateTime dateTime, IReservationCalculService reservationService)
+    public ReserveVehicleCommandHandler(IApplicationDbContext context, IDateTime dateTime, IPriceCalculationService priceCalculation)
     {
         _context = context;
         _dateTime = dateTime;
-        _reservationService = reservationService;
+        _priceCalculation = priceCalculation;
     }
     public async Task<bool> Handle(ReserveVehicleCommand request, CancellationToken cancellationToken)
     {
@@ -40,7 +40,7 @@ public class ReserveVehicleCommandHandler : IRequestHandler<ReserveVehicleComman
         var client = await _context.Clients.FirstOrDefaultAsync(d => d.Id == request.ClientId) ?? throw new NotFoundException(nameof(request.ClientId));
 
         Reservation reservation = new() { StartDate = request.StartDate, EndDate = request.EndDate, Vehicle = vehicle, Client = client };
-        var bonus = _reservationService.CalculateBonus(request.StartDate);
+        var bonus = _priceCalculation.CalculateBonus(request.StartDate);
 
         Plan plan = new() { StartDepot = startDepot, PlanType = request.PlanType, Reservation = reservation, BonusRate = bonus };
 
@@ -55,6 +55,8 @@ public class ReserveVehicleCommandHandler : IRequestHandler<ReserveVehicleComman
             plan.KilometerPrice = startDepot.Country.KilometerPrice;
         }
         reservation.Plan = plan;
+        reservation.ReservationStatus = request.StartDate.Date == DateTime.Now.Date ? ReservationStatus.Pending : ReservationStatus.Booked;
+
         _context.Reservations.Add(reservation);
         return await _context.SaveChangesAsync(cancellationToken) > 0;
     }

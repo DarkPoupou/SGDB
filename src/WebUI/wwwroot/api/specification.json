@@ -366,6 +366,37 @@
         }
       }
     },
+    "/api/Reservation/start": {
+      "put": {
+        "tags": [
+          "Reservation"
+        ],
+        "operationId": "Reservation_StartReservation",
+        "parameters": [
+          {
+            "name": "reservationId",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "x-position": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/Roles": {
       "get": {
         "tags": [
@@ -1056,6 +1087,21 @@
           "endDate": {
             "type": "string",
             "format": "date-time"
+          },
+          "price": {
+            "type": "number",
+            "format": "double"
+          },
+          "planPlanType": {
+            "$ref": "#/components/schemas/PlanType"
+          },
+          "planStartDepotId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "planEndDepotId": {
+            "type": "integer",
+            "format": "int32"
           }
         }
       },
@@ -1101,10 +1147,22 @@
           "Cancelled"
         ],
         "enum": [
-          0,
           1,
           2,
-          3
+          3,
+          4
+        ]
+      },
+      "PlanType": {
+        "type": "integer",
+        "description": "",
+        "x-enumNames": [
+          "Kilometric",
+          "Fee"
+        ],
+        "enum": [
+          1,
+          2
         ]
       },
       "ReserveVehicleCommand": {
@@ -1140,18 +1198,6 @@
             "format": "int32"
           }
         }
-      },
-      "PlanType": {
-        "type": "integer",
-        "description": "",
-        "x-enumNames": [
-          "Kilometric",
-          "Fee"
-        ],
-        "enum": [
-          1,
-          2
-        ]
       },
       "CloseReservationDto": {
         "type": "object",

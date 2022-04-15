@@ -16,4 +16,8 @@ public class ReservationDto: IMapFrom<Reservation>
     public ReservationStatus ReservationStatus { get; set; }
     public DateTime StartDate { get; set; }
     public DateTime EndDate { get; set; }
+    public double Price { get; set; }
+    public PlanType PlanPlanType { get; set; }
+    public int PlanStartDepotId { get; set; }
+    public int PlanEndDepotId { get; set; }
 }

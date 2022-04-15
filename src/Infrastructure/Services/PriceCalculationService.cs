@@ -13,10 +13,23 @@ namespace CleanArchitecture.Infrastructure.Services;
 public class PriceCalculationService : IPriceCalculationService
 {
     private readonly IApplicationDbContext _context;
+    private readonly IDateTime _dateTime;
 
-    public PriceCalculationService (IApplicationDbContext context)
+    public PriceCalculationService (IApplicationDbContext context, IDateTime dateTime)
     {
         _context = context;
+        _dateTime = dateTime;
+    }
+    public double CalculateBonus(DateTime startDate)
+    {
+        if (startDate < DateTime.Now)
+            throw new ValidationException();
+
+        var diff = startDate.Date - _dateTime.Now.Date;
+        var nbWeeks = Math.Max(((int)diff.TotalDays / 7) - 1, 0);
+        double bonus = 0.05 * nbWeeks;
+        bonus = bonus > 0.2 ? 0.2 : bonus;
+        return bonus;
     }
     public async Task<double> CalculReservationPriceAsync(IPriceReservationCalculModel reservation, double additionalPlanTypeParameter)
     {
