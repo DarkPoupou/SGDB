@@ -16,4 +16,9 @@ public class ClientsController : ApiControllerBase
     {
         return await Mediator.Send(command);
     }
+    [HttpGet("Email")]
+    public async Task<ActionResult<ClientDto>> GetClientByEmail(string email)
+    {
+        return await Mediator.Send(new GetClientByEmailQuery { Email = email });
+    }
 }
