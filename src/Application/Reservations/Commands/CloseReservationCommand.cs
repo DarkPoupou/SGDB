@@ -17,38 +17,46 @@ public class CloseReservationCommand: IRequest<CloseReservationDto>
 {
     public int ReservationId { get; set; }
     public double NbKilometers { get; set; }
+    public int DepotId { get; set; }
 }
 public class CloseReservationCommandHandler : IRequestHandler<CloseReservationCommand, CloseReservationDto>
 {
     private readonly IApplicationDbContext _context;
     private readonly IMapper _mapper;
+    private readonly IPriceCalculationService _priceCalculation;
 
-    public CloseReservationCommandHandler(IApplicationDbContext context, IMapper mapper)
+    public CloseReservationCommandHandler(IApplicationDbContext context, IMapper mapper, IPriceCalculationService priceCalculation)
     {
         _context = context;
         _mapper = mapper;
+        _priceCalculation = priceCalculation;
     }
     public async Task<CloseReservationDto> Handle(CloseReservationCommand request, CancellationToken cancellationToken)
     {
-        var reservation = await _context.Reservations.FirstOrDefaultAsync(r => r.Id == request.ReservationId);
-        double price = 0;
+        var reservation = await _context.Reservations.FindAsync(request.ReservationId);
+        double price = await _priceCalculation.CalculReservationPriceAsync(_mapper.Map<PriceReservationCalculModel>(reservation), Math.Max(request.NbKilometers, request.DepotId));
         if(reservation.Plan.PlanType == PlanType.Kilometric)
         {
             reservation.Kilometers = request.NbKilometers;
-            price = reservation.Plan.KilometerPrice.Value * reservation.Kilometers * reservation.Vehicle.Notoriety.Coefficient;
+            //price = _priceCalculation.KilometricPriceCalcul(reservation.Plan.KilometerPrice, reservation.Kilometers, reservation.Vehicle.Brand.Notoriety);
+            //price = reservation.Plan.KilometerPrice * reservation.Kilometers * Math.Sqrt((int)reservation.Vehicle.Brand.Notoriety);
         }
         else
         {
-            var fee = await _context.Fees.FirstOrDefaultAsync(
-                f => (f.Depot1Id == reservation.Plan.StartDepotId && f.Depot2Id == reservation.Plan.EndDepotId)
-                || (f.Depot1Id == reservation.Plan.EndDepotId && f.Depot2Id == reservation.Plan.StartDepotId)) 
-                ?? throw new NotFoundException("no fee found");
+            var endDepot = _context.Depots.FirstOrDefault(r => r.Id == request.DepotId) ?? throw new NotFoundException(nameof(request.DepotId));
+            //var fee = await _context.Fees.FirstOrDefaultAsync(
+            //    f => (f.Depot1Id == reservation.Plan.StartDepotId && f.Depot2Id == reservation.Plan.EndDepotId)
+            //    || (f.Depot1Id == reservation.Plan.EndDepotId && f.Depot2Id == reservation.Plan.StartDepotId)) 
+            //    ?? throw new NotFoundException("no fee found");
 
-            var nbDays = (reservation.EndDate.Date - reservation.StartDate.Date).TotalDays;
-            price = (int)nbDays * fee.Price * reservation.Vehicle.Notoriety.Coefficient;
+            //var endDepotRate = endDepot.Id == reservation.Plan.EndDepotId ? 0.95 : 1.1;
+            //var nbDays = (reservation.EndDate.Date - reservation.StartDate.Date).TotalDays;
+            //price = (int)nbDays * fee.Price * endDepotRate * Math.Sqrt((int)reservation.Vehicle.Brand.Notoriety);
+            reservation.Plan.EndDepot = endDepot;
         }
         reservation.Price = price;
         await _context.SaveChangesAsync(cancellationToken);
-        return await _context.Reservations.ProjectTo<CloseReservationDto>(_mapper.ConfigurationProvider).FirstOrDefaultAsync(f => f.Id == request.ReservationId);        
+        return await _context.Reservations.ProjectTo<CloseReservationDto>(_mapper.ConfigurationProvider).FirstOrDefaultAsync(f => f.Id == request.ReservationId)
+            ?? throw new NotFoundException(nameof(request.ReservationId), request.ReservationId);    
     }
 }

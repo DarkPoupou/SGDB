@@ -11,6 +11,5 @@ public class VehicleDto: IMapFrom<Vehicle>
 {
     public int Id { get; set; }
     public string Immatriculation { get; set; }
-    public NotorietyDto Notoriety { get; set; }
     public BrandDto Brand { get; set; }    
 }

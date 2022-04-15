@@ -35,7 +35,6 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
     public DbSet<Vehicle> Vehicles => Set<Vehicle>();
     public DbSet<Plan> Plans => Set<Plan>();
     public DbSet<Brand> Brands => Set<Brand>();
-    public DbSet<Notoriety> Notorieties => Set<Notoriety>();
     public DbSet<Depot> Depots => Set<Depot>();
     public DbSet<Country> Countries => Set<Country>();
     public DbSet<Fee> Fees => Set<Fee>();

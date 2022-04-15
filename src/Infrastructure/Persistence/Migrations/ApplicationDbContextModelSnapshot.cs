@@ -43,7 +43,7 @@ namespace CleanArchitecture.Infrastructure.Persistence.Migrations
                     b.HasIndex("Name", "Model")
                         .IsUnique();
 
-                    b.ToTable("Brands");
+                    b.ToTable("Brands", (string)null);
                 });
 
             modelBuilder.Entity("CleanArchitecture.Domain.Entities.Client", b =>
@@ -72,7 +72,7 @@ namespace CleanArchitecture.Infrastructure.Persistence.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Clients");
+                    b.ToTable("Clients", (string)null);
                 });
 
             modelBuilder.Entity("CleanArchitecture.Domain.Entities.Country", b =>
@@ -95,7 +95,7 @@ namespace CleanArchitecture.Infrastructure.Persistence.Migrations
                     b.HasIndex("Name")
                         .IsUnique();
 
-                    b.ToTable("Countries");
+                    b.ToTable("Countries", (string)null);
                 });
 
             modelBuilder.Entity("CleanArchitecture.Domain.Entities.Depot", b =>
@@ -125,7 +125,7 @@ namespace CleanArchitecture.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("CountryId");
 
-                    b.ToTable("Depots");
+                    b.ToTable("Depots", (string)null);
                 });
 
             modelBuilder.Entity("CleanArchitecture.Domain.Entities.Employee", b =>
@@ -159,7 +159,7 @@ namespace CleanArchitecture.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("RoleId");
 
-                    b.ToTable("Employees");
+                    b.ToTable("Employees", (string)null);
                 });
 
             modelBuilder.Entity("CleanArchitecture.Domain.Entities.Fee", b =>
@@ -186,7 +186,7 @@ namespace CleanArchitecture.Infrastructure.Persistence.Migrations
                     b.HasIndex("Depot1Id", "Depot2Id")
                         .IsUnique();
 
-                    b.ToTable("Fees");
+                    b.ToTable("Fees", (string)null);
                 });
 
             modelBuilder.Entity("CleanArchitecture.Domain.Entities.Notoriety", b =>
@@ -206,7 +206,7 @@ namespace CleanArchitecture.Infrastructure.Persistence.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Notorieties");
+                    b.ToTable("Notorieties", (string)null);
                 });
 
             modelBuilder.Entity("CleanArchitecture.Domain.Entities.Plan", b =>
@@ -238,7 +238,7 @@ namespace CleanArchitecture.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("StartDepotId");
 
-                    b.ToTable("Plans");
+                    b.ToTable("Plans", (string)null);
                 });
 
             modelBuilder.Entity("CleanArchitecture.Domain.Entities.Reservation", b =>
@@ -282,7 +282,7 @@ namespace CleanArchitecture.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("VehicleId");
 
-                    b.ToTable("Reservations");
+                    b.ToTable("Reservations", (string)null);
                 });
 
             modelBuilder.Entity("CleanArchitecture.Domain.Entities.Role", b =>
@@ -299,7 +299,7 @@ namespace CleanArchitecture.Infrastructure.Persistence.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Roles");
+                    b.ToTable("Roles", (string)null);
                 });
 
             modelBuilder.Entity("CleanArchitecture.Domain.Entities.TodoItem", b =>
@@ -346,7 +346,7 @@ namespace CleanArchitecture.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("ListId");
 
-                    b.ToTable("TodoItems");
+                    b.ToTable("TodoItems", (string)null);
                 });
 
             modelBuilder.Entity("CleanArchitecture.Domain.Entities.TodoList", b =>
@@ -376,7 +376,7 @@ namespace CleanArchitecture.Infrastructure.Persistence.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("TodoLists");
+                    b.ToTable("TodoLists", (string)null);
                 });
 
             modelBuilder.Entity("CleanArchitecture.Domain.Entities.Vehicle", b =>
@@ -413,7 +413,7 @@ namespace CleanArchitecture.Infrastructure.Persistence.Migrations
                     b.HasIndex("NotorietyId")
                         .IsUnique();
 
-                    b.ToTable("Vehicles");
+                    b.ToTable("Vehicles", (string)null);
                 });
 
             modelBuilder.Entity("CleanArchitecture.Domain.Entities.Depot", b =>
@@ -516,7 +516,7 @@ namespace CleanArchitecture.Infrastructure.Persistence.Migrations
 
             modelBuilder.Entity("CleanArchitecture.Domain.Entities.TodoList", b =>
                 {
-                    b.OwnsOne("CleanArchitecture.Domain.ValueObjects.Colour", "Colour", b1 =>
+                    b.OwnsOne("CleanArchitecture.Domain.Entities.TodoList.Colour#CleanArchitecture.Domain.ValueObjects.Colour", "Colour", b1 =>
                         {
                             b1.Property<int>("TodoListId")
                                 .HasColumnType("int");
@@ -527,7 +527,7 @@ namespace CleanArchitecture.Infrastructure.Persistence.Migrations
 
                             b1.HasKey("TodoListId");
 
-                            b1.ToTable("TodoLists");
+                            b1.ToTable("TodoLists", (string)null);
 
                             b1.WithOwner()
                                 .HasForeignKey("TodoListId");

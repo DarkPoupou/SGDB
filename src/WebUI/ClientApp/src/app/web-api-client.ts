@@ -2084,8 +2084,8 @@ export interface IReserveVehicleCommand {
 }
 
 export enum PlanType {
-    Kilometric = 0,
-    Fee = 1,
+    Kilometric = 1,
+    Fee = 2,
 }
 
 export class CloseReservationDto implements ICloseReservationDto {

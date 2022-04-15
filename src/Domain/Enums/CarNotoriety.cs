@@ -5,8 +5,11 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace CleanArchitecture.Domain.Enums;
-public enum PlanType
+public enum CarNotoriety
 {
-    Kilometric = 1,
-    Fee
+    Car = 1,
+    van,
+    Suv,
+    Truck,
+    Luxury = 25
 }

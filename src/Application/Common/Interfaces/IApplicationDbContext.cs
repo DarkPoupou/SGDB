@@ -15,7 +15,6 @@ public interface IApplicationDbContext
     DbSet<Vehicle> Vehicles { get; }
     DbSet<Plan> Plans { get; }  
     DbSet<Brand> Brands { get; }
-    DbSet<Notoriety> Notorieties { get; }
     DbSet<Depot> Depots { get; }
     DbSet<Country> Countries { get; }
     DbSet<Fee> Fees { get; }

@@ -6,4 +6,5 @@ public class Brand
     public string Name { get; set; }
     public string Model { get; set; }
     public Vehicle Vehicle { get; set; }
+    public CarNotoriety Notoriety { get; set; }
 }

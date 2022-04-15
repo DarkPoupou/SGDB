@@ -37,6 +37,7 @@ public static class DependencyInjection
         services.AddTransient<ICsvFileBuilder, CsvFileBuilder>();
         services.AddTransient<IDepotService, DepotService>();
         services.AddTransient<IReservationCalculService, ReservationCalculService>();
+        services.AddTransient<IPriceCalculationService, PriceCalculationService>();
 
         services.AddAuthentication();
 

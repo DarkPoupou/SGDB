@@ -35,7 +35,7 @@ public class ReserveVehicleCommandHandler : IRequestHandler<ReserveVehicleComman
     }
     public async Task<bool> Handle(ReserveVehicleCommand request, CancellationToken cancellationToken)
     {
-        var startDepot = await _context.Depots.FirstOrDefaultAsync(d => d.Id == request.StartDepotId) ?? throw new NotFoundException(nameof(request.StartDepotId));
+        var startDepot = await _context.Depots.Include(d => d.Country).FirstOrDefaultAsync(d => d.Id == request.StartDepotId) ?? throw new NotFoundException(nameof(request.StartDepotId));
         var vehicle = await _context.Vehicles.FirstOrDefaultAsync(d => d.Id == request.VehicleId) ?? throw new NotFoundException(nameof(request.VehicleId));
         var client = await _context.Clients.FirstOrDefaultAsync(d => d.Id == request.ClientId) ?? throw new NotFoundException(nameof(request.ClientId));
 

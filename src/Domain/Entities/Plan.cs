@@ -8,7 +8,7 @@ public class Plan
     public Reservation Reservation { get; set; }
     public Depot StartDepot { get; set; }
     public int StartDepotId { get; set; }
-    public Depot EndDepot { get; set; }
-    public int EndDepotId { get; set; }
-    public double? KilometerPrice { get; set; }
+    public Depot? EndDepot { get; set; }
+    public int? EndDepotId { get; set; }
+    public double? KilometerPrice { get; set; } 
 }
