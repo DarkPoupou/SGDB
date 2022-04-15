@@ -28,7 +28,6 @@ public class GetClientByEmailQueryHandler : IRequestHandler<GetClientByEmailQuer
     }
     public async Task<ClientDto> Handle(GetClientByEmailQuery request, CancellationToken cancellationToken)
     {
-        return await _context.Clients.ProjectTo<ClientDto>(_mapper.ConfigurationProvider).FirstOrDefaultAsync(c => c.Email == request.Email)
-            ?? throw new NotFoundException(nameof(request.Email), request.Email);
+        return await _context.Clients.ProjectTo<ClientDto>(_mapper.ConfigurationProvider).FirstOrDefaultAsync(c => c.Email == request.Email);            
     }
 }
