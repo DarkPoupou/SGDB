@@ -3056,6 +3056,7 @@ export class AddVehicleCommand implements IAddVehicleCommand {
     name?: string;
     model?: string;
     carNotoriety?: CarNotoriety;
+    kilometer?: number;
 
     constructor(data?: IAddVehicleCommand) {
         if (data) {
@@ -3073,6 +3074,7 @@ export class AddVehicleCommand implements IAddVehicleCommand {
             this.name = _data["name"];
             this.model = _data["model"];
             this.carNotoriety = _data["carNotoriety"];
+            this.kilometer = _data["kilometer"];
         }
     }
 
@@ -3090,6 +3092,7 @@ export class AddVehicleCommand implements IAddVehicleCommand {
         data["name"] = this.name;
         data["model"] = this.model;
         data["carNotoriety"] = this.carNotoriety;
+        data["kilometer"] = this.kilometer;
         return data; 
     }
 }
@@ -3100,6 +3103,7 @@ export interface IAddVehicleCommand {
     name?: string;
     model?: string;
     carNotoriety?: CarNotoriety;
+    kilometer?: number;
 }
 
 export enum CarNotoriety {

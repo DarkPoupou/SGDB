@@ -1627,6 +1627,10 @@
           },
           "carNotoriety": {
             "$ref": "#/components/schemas/CarNotoriety"
+          },
+          "kilometer": {
+            "type": "number",
+            "format": "double"
           }
         }
       },

@@ -16,6 +16,7 @@ public class AddVehicleCommand: IRequest<bool>
     public string Name { get; set; }
     public string Model { get; set; }
     public CarNotoriety CarNotoriety { get; set; }
+    public double Kilometer { get; set; }
 }
 public class AddVehicleCommandHandler : IRequestHandler<AddVehicleCommand, bool>
 {
@@ -37,7 +38,8 @@ public class AddVehicleCommandHandler : IRequestHandler<AddVehicleCommand, bool>
         {
             Brand = brand,
             Immatriculation = request.Immatriculation,
-            DepotId = request.DepotId
+            DepotId = request.DepotId,
+            Kilometer = request.Kilometer
         };
         var r = await _context.Vehicles.AddAsync(vehicle);
         return await _context.SaveChangesAsync(cancellationToken) > 0;
