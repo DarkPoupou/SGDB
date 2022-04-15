@@ -20,5 +20,7 @@ public class FeeConfiguration : IEntityTypeConfiguration<Fee>
             .HasOne(f => f.Depot2)
             .WithMany(d => d.Depot2)
             .HasForeignKey(f => f.Depot2Id);
+
+        builder.HasIndex(f => new { f.Depot1Id, f.Depot2Id }).IsUnique();
     }
 }
