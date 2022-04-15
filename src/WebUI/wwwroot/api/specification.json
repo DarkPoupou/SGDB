@@ -113,6 +113,37 @@
         }
       }
     },
+    "/api/Depots/byId": {
+      "get": {
+        "tags": [
+          "Depots"
+        ],
+        "operationId": "Depots_GetDepotById",
+        "parameters": [
+          {
+            "name": "depotId",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "x-position": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DepotDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/Employees/Id": {
       "get": {
         "tags": [
@@ -833,7 +864,7 @@
         "tags": [
           "Vehicles"
         ],
-        "operationId": "Vehicles_GetavailableVehicles",
+        "operationId": "Vehicles_GetavailableVehiclesAll",
         "parameters": [
           {
             "name": "startDate",
@@ -861,6 +892,70 @@
               "format": "int32"
             },
             "x-position": 3
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/VehicleDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Vehicles"
+        ],
+        "operationId": "Vehicles_AddNewVehicle",
+        "requestBody": {
+          "x-name": "command",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddVehicleCommand"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 1
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Vehicles/depot": {
+      "get": {
+        "tags": [
+          "Vehicles"
+        ],
+        "operationId": "Vehicles_GetavailableVehicles",
+        "parameters": [
+          {
+            "name": "depotId",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "x-position": 1
           }
         ],
         "responses": {
@@ -1512,6 +1607,46 @@
             "nullable": true
           }
         }
+      },
+      "AddVehicleCommand": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "immatriculation": {
+            "type": "string"
+          },
+          "depotId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "name": {
+            "type": "string"
+          },
+          "model": {
+            "type": "string"
+          },
+          "carNotoriety": {
+            "$ref": "#/components/schemas/CarNotoriety"
+          }
+        }
+      },
+      "CarNotoriety": {
+        "type": "integer",
+        "description": "",
+        "x-enumNames": [
+          "Car",
+          "van",
+          "Suv",
+          "Truck",
+          "Luxury"
+        ],
+        "enum": [
+          1,
+          2,
+          3,
+          4,
+          25
+        ]
       },
       "WeatherForecast": {
         "type": "object",

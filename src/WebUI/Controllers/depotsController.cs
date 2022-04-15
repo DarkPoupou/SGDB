@@ -10,5 +10,9 @@ public class DepotsController : ApiControllerBase
     {
         return await Mediator.Send(new GetdepotsQuery());
     }
-
+    [HttpGet("byId")]
+    public async Task<ActionResult<DepotDto>> GetDepotById(int depotId)
+    {
+        return await Mediator.Send(new GetDepotByIdQuery() { DepotId = depotId });
+    }
 }

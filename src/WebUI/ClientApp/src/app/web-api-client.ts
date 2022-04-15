@@ -190,6 +190,7 @@ export class ClientsClient implements IClientsClient {
 
 export interface IDepotsClient {
     getDepots(): Observable<DepotDto[]>;
+    getDepotById(depotId: number | undefined): Observable<DepotDto>;
 }
 
 @Injectable({
@@ -255,6 +256,58 @@ export class DepotsClient implements IDepotsClient {
             }));
         }
         return _observableOf<DepotDto[]>(<any>null);
+    }
+
+    getDepotById(depotId: number | undefined): Observable<DepotDto> {
+        let url_ = this.baseUrl + "/api/Depots/byId?";
+        if (depotId === null)
+            throw new Error("The parameter 'depotId' cannot be null.");
+        else if (depotId !== undefined)
+            url_ += "depotId=" + encodeURIComponent("" + depotId) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Accept": "application/json"
+            })
+        };
+
+        return this.http.request("get", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processGetDepotById(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processGetDepotById(<any>response_);
+                } catch (e) {
+                    return <Observable<DepotDto>><any>_observableThrow(e);
+                }
+            } else
+                return <Observable<DepotDto>><any>_observableThrow(response_);
+        }));
+    }
+
+    protected processGetDepotById(response: HttpResponseBase): Observable<DepotDto> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (<any>response).error instanceof Blob ? (<any>response).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = DepotDto.fromJS(resultData200);
+            return _observableOf(result200);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf<DepotDto>(<any>null);
     }
 }
 
@@ -1409,7 +1462,9 @@ export class TodoListsClient implements ITodoListsClient {
 }
 
 export interface IVehiclesClient {
-    getavailableVehicles(startDate: Date | undefined, endate: Date | undefined, depotId: number | undefined): Observable<VehicleDto[]>;
+    getavailableVehiclesAll(startDate: Date | undefined, endate: Date | undefined, depotId: number | undefined): Observable<VehicleDto[]>;
+    addNewVehicle(command: AddVehicleCommand): Observable<boolean>;
+    getavailableVehicles(depotId: number | undefined): Observable<VehicleDto[]>;
 }
 
 @Injectable({
@@ -1425,7 +1480,7 @@ export class VehiclesClient implements IVehiclesClient {
         this.baseUrl = baseUrl !== undefined && baseUrl !== null ? baseUrl : "";
     }
 
-    getavailableVehicles(startDate: Date | undefined, endate: Date | undefined, depotId: number | undefined): Observable<VehicleDto[]> {
+    getavailableVehiclesAll(startDate: Date | undefined, endate: Date | undefined, depotId: number | undefined): Observable<VehicleDto[]> {
         let url_ = this.baseUrl + "/api/Vehicles?";
         if (startDate === null)
             throw new Error("The parameter 'startDate' cannot be null.");
@@ -1435,6 +1490,114 @@ export class VehiclesClient implements IVehiclesClient {
             throw new Error("The parameter 'endate' cannot be null.");
         else if (endate !== undefined)
             url_ += "endate=" + encodeURIComponent(endate ? "" + endate.toJSON() : "") + "&";
+        if (depotId === null)
+            throw new Error("The parameter 'depotId' cannot be null.");
+        else if (depotId !== undefined)
+            url_ += "depotId=" + encodeURIComponent("" + depotId) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Accept": "application/json"
+            })
+        };
+
+        return this.http.request("get", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processGetavailableVehiclesAll(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processGetavailableVehiclesAll(<any>response_);
+                } catch (e) {
+                    return <Observable<VehicleDto[]>><any>_observableThrow(e);
+                }
+            } else
+                return <Observable<VehicleDto[]>><any>_observableThrow(response_);
+        }));
+    }
+
+    protected processGetavailableVehiclesAll(response: HttpResponseBase): Observable<VehicleDto[]> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (<any>response).error instanceof Blob ? (<any>response).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            if (Array.isArray(resultData200)) {
+                result200 = [] as any;
+                for (let item of resultData200)
+                    result200!.push(VehicleDto.fromJS(item));
+            }
+            return _observableOf(result200);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf<VehicleDto[]>(<any>null);
+    }
+
+    addNewVehicle(command: AddVehicleCommand): Observable<boolean> {
+        let url_ = this.baseUrl + "/api/Vehicles";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(command);
+
+        let options_ : any = {
+            body: content_,
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            })
+        };
+
+        return this.http.request("post", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processAddNewVehicle(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processAddNewVehicle(<any>response_);
+                } catch (e) {
+                    return <Observable<boolean>><any>_observableThrow(e);
+                }
+            } else
+                return <Observable<boolean>><any>_observableThrow(response_);
+        }));
+    }
+
+    protected processAddNewVehicle(response: HttpResponseBase): Observable<boolean> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (<any>response).error instanceof Blob ? (<any>response).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = resultData200 !== undefined ? resultData200 : <any>null;
+            return _observableOf(result200);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf<boolean>(<any>null);
+    }
+
+    getavailableVehicles(depotId: number | undefined): Observable<VehicleDto[]> {
+        let url_ = this.baseUrl + "/api/Vehicles/depot?";
         if (depotId === null)
             throw new Error("The parameter 'depotId' cannot be null.");
         else if (depotId !== undefined)
@@ -2885,6 +3048,66 @@ export class UpdateTodoListCommand implements IUpdateTodoListCommand {
 export interface IUpdateTodoListCommand {
     id?: number;
     title?: string | undefined;
+}
+
+export class AddVehicleCommand implements IAddVehicleCommand {
+    immatriculation?: string;
+    depotId?: number;
+    name?: string;
+    model?: string;
+    carNotoriety?: CarNotoriety;
+
+    constructor(data?: IAddVehicleCommand) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.immatriculation = _data["immatriculation"];
+            this.depotId = _data["depotId"];
+            this.name = _data["name"];
+            this.model = _data["model"];
+            this.carNotoriety = _data["carNotoriety"];
+        }
+    }
+
+    static fromJS(data: any): AddVehicleCommand {
+        data = typeof data === 'object' ? data : {};
+        let result = new AddVehicleCommand();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["immatriculation"] = this.immatriculation;
+        data["depotId"] = this.depotId;
+        data["name"] = this.name;
+        data["model"] = this.model;
+        data["carNotoriety"] = this.carNotoriety;
+        return data; 
+    }
+}
+
+export interface IAddVehicleCommand {
+    immatriculation?: string;
+    depotId?: number;
+    name?: string;
+    model?: string;
+    carNotoriety?: CarNotoriety;
+}
+
+export enum CarNotoriety {
+    Car = 1,
+    Van = 2,
+    Suv = 3,
+    Truck = 4,
+    Luxury = 25,
 }
 
 export class WeatherForecast implements IWeatherForecast {
