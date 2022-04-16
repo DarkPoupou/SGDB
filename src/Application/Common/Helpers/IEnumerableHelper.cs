@@ -7,7 +7,7 @@ using CleanArchitecture.Domain.Entities;
 using CleanArchitecture.Domain.Enums;
 
 namespace CleanArchitecture.Application.Common.Helpers;
-public static class ICollectionHelper
+public static class IEnumerableHelper
 {
     public static bool HasBookedReservation(this IEnumerable<Reservation> source, DateTime startDate, DateTime endDate)
     {

@@ -1,6 +1,6 @@
 ﻿namespace CleanArchitecture.Domain.Entities;
 
-public class TodoItem : AuditableEntity, IHasDomainEvent
+public class TodoItem : IHasDomainEvent
 {
     public int Id { get; set; }
 

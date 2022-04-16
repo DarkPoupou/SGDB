@@ -1,5 +1,4 @@
 ﻿using CleanArchitecture.Application.Common.Interfaces;
-using CleanArchitecture.Infrastructure.Files;
 using CleanArchitecture.Infrastructure.Persistence;
 using CleanArchitecture.Infrastructure.Services;
 using Microsoft.AspNetCore.Authentication;
@@ -29,11 +28,7 @@ public static class DependencyInjection
 
         services.AddScoped<IApplicationDbContext>(provider => provider.GetRequiredService<ApplicationDbContext>());
 
-        services.AddScoped<IDomainEventService, DomainEventService>();
-
-
         services.AddTransient<IDateTime, DateTimeService>();
-        services.AddTransient<ICsvFileBuilder, CsvFileBuilder>();
         services.AddTransient<IDepotService, DepotService>();
         services.AddTransient<IPriceCalculationService, PriceCalculationService>();
 

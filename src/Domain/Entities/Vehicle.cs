@@ -1,9 +1,12 @@
-﻿namespace CleanArchitecture.Domain.Entities;
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace CleanArchitecture.Domain.Entities;
 
 public class Vehicle
 {
     public int Id { get; set; }
     public ICollection<Reservation> Reservations{ get; set; }
+    [MaxLength(50)]
     public string Immatriculation { get; set; }
     public double Kilometer { get; set; }
     //public Notoriety Notoriety { get; set; }
