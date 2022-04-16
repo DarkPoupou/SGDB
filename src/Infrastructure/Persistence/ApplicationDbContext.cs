@@ -2,7 +2,6 @@
 using CleanArchitecture.Application.Common.Interfaces;
 using CleanArchitecture.Domain.Common;
 using CleanArchitecture.Domain.Entities;
-using CleanArchitecture.Infrastructure.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 
@@ -38,36 +37,36 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
     public DbSet<Depot> Depots => Set<Depot>();
     public DbSet<Country> Countries => Set<Country>();
     public DbSet<Fee> Fees => Set<Fee>();
-    public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = new CancellationToken())
-    {
-        foreach (var entry in ChangeTracker.Entries<AuditableEntity>())
-        {
-            switch (entry.State)
-            {
-                case EntityState.Added:
-                    entry.Entity.CreatedBy = _currentUserService.UserId;
-                    entry.Entity.Created = _dateTime.Now;
-                    break;
+    //public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = new CancellationToken())
+    //{
+    //    foreach (var entry in ChangeTracker.Entries<AuditableEntity>())
+    //    {
+    //        switch (entry.State)
+    //        {
+    //            case EntityState.Added:
+    //                entry.Entity.CreatedBy = _currentUserService.UserId;
+    //                entry.Entity.Created = _dateTime.Now;
+    //                break;
 
-                case EntityState.Modified:
-                    entry.Entity.LastModifiedBy = _currentUserService.UserId;
-                    entry.Entity.LastModified = _dateTime.Now;
-                    break;
-            }
-        }
+    //            case EntityState.Modified:
+    //                entry.Entity.LastModifiedBy = _currentUserService.UserId;
+    //                entry.Entity.LastModified = _dateTime.Now;
+    //                break;
+    //        }
+    //    }
 
-        var events = ChangeTracker.Entries<IHasDomainEvent>()
-                .Select(x => x.Entity.DomainEvents)
-                .SelectMany(x => x)
-                .Where(domainEvent => !domainEvent.IsPublished)
-                .ToArray();
+    //    var events = ChangeTracker.Entries<IHasDomainEvent>()
+    //            .Select(x => x.Entity.DomainEvents)
+    //            .SelectMany(x => x)
+    //            .Where(domainEvent => !domainEvent.IsPublished)
+    //            .ToArray();
 
-        var result = await base.SaveChangesAsync(cancellationToken);
+    //    var result = await base.SaveChangesAsync(cancellationToken);
 
-        await DispatchEvents(events);
+    //    await DispatchEvents(events);
 
-        return result;
-    }
+    //    return result;
+    //}
 
     protected override void OnModelCreating(ModelBuilder builder)
     {

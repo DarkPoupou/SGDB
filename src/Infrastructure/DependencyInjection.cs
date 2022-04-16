@@ -1,6 +1,5 @@
 ﻿using CleanArchitecture.Application.Common.Interfaces;
 using CleanArchitecture.Infrastructure.Files;
-using CleanArchitecture.Infrastructure.Identity;
 using CleanArchitecture.Infrastructure.Persistence;
 using CleanArchitecture.Infrastructure.Services;
 using Microsoft.AspNetCore.Authentication;

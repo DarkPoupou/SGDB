@@ -11,7 +11,6 @@ public class GetavailableVehiclesQueryValidator: AbstractValidator<GetavailableV
 {
     public GetavailableVehiclesQueryValidator(IDateTime dateTime)
     {
-        RuleFor(x => x.StartDate).NotNull().GreaterThanOrEqualTo(dateTime.Now).LessThanOrEqualTo(x => x.EndDate);
-        RuleFor(x => x.EndDate).GreaterThanOrEqualTo(x => x.EndDate).When(x => x.EndDate != null);
+        RuleFor(x => x.StartDate).NotNull().GreaterThanOrEqualTo(dateTime.Now.Date).LessThanOrEqualTo(x => x.EndDate);        
     }
 }

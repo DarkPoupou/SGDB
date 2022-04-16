@@ -41,7 +41,7 @@ public class AddVehicleCommandHandler : IRequestHandler<AddVehicleCommand, bool>
             DepotId = request.DepotId,
             Kilometer = request.Kilometer
         };
-        var r = await _context.Vehicles.AddAsync(vehicle);
+        _context.Vehicles.AddAsync(vehicle);
         return await _context.SaveChangesAsync(cancellationToken) > 0;
     }
 }
