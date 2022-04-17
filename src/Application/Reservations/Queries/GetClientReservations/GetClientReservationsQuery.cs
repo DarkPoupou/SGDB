@@ -38,7 +38,7 @@ public class GetClientReservationsQueryHandler : IRequestHandler<GetClientReserv
         {
             if(reservation.Price == 0 && reservation.PlanPlanType == PlanType.Fee)
             {
-                reservation.Price = await _priceCalculation.CalculReservationPriceAsync(_mapper.Map<PriceReservationCalculModel>(reservation), reservation.PlanEndDepotId);
+                reservation.Price = await _priceCalculation.CalculReservationPriceAsync(reservation, reservation.PlanEndDepotId);
             }
         }
         return r;

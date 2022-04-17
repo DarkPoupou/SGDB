@@ -11,7 +11,7 @@ namespace CleanArchitecture.Application.Common.Interfaces;
 public interface IPriceCalculationService
 {
     Task<double> CalculReservationPriceAsync(IPriceReservationCalculModel reservation, double additionalPlanTypeParameter);
-    double FeePriceCalcul(bool isCorrectEndDepot, int nbDays, double feePrice, CarNotoriety notoriety);
-    double KilometricPriceCalcul(double priceKilometer, double kilometers, CarNotoriety notoriety);
+    double FeePriceCalcul(bool isCorrectEndDepot, int nbDays, double feePrice, CarNotoriety notoriety, double bonusRate);
+    double KilometricPriceCalcul(double priceKilometer, double kilometers, CarNotoriety notoriety, double bonusRate);
     double CalculateBonus(DateTime startDate);
 }

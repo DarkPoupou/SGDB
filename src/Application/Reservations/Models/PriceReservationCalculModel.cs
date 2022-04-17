@@ -19,10 +19,13 @@ public interface IPriceReservationCalculModel
     DateTime StartDate { get; set; }
     CarNotoriety VehicleBrandNotoriety { get; set; }
     PlanType PlanPlanType { get; set; }
+    public double PlanBonusRate { get; set; }
+
 }
 
-public class PriceReservationCalculModel : IMapFrom<ReservationDto>, IPriceReservationCalculModel
+public class PriceReservationCalculModel : ReservationDto, IPriceReservationCalculModel
 {
+    public double PlanBonusRate { get; set; }
     public DateTime StartDate { get; set; }
     public DateTime EndDate { get; set; }
     public double Kilometers { get; set; } = 0;

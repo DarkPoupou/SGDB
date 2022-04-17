@@ -33,28 +33,18 @@ public class CloseReservationCommandHandler : IRequestHandler<CloseReservationCo
     }
     public async Task<CloseReservationDto> Handle(CloseReservationCommand request, CancellationToken cancellationToken)
     {
-        var reservation = await _context.Reservations.FindAsync(request.ReservationId);
-        double price = await _priceCalculation.CalculReservationPriceAsync(_mapper.Map<PriceReservationCalculModel>(reservation), Math.Max(request.NbKilometers, request.DepotId));
+        var reservation = await _context.Reservations.Include(r => r.Plan).Include(r => r.Vehicle).ThenInclude(v => v.Brand).FirstOrDefaultAsync(r => r.Id == request.ReservationId);
         if(reservation.Plan.PlanType == PlanType.Kilometric)
         {
             reservation.Kilometers = request.NbKilometers;
-            //price = _priceCalculation.KilometricPriceCalcul(reservation.Plan.KilometerPrice, reservation.Kilometers, reservation.Vehicle.Brand.Notoriety);
-            //price = reservation.Plan.KilometerPrice * reservation.Kilometers * Math.Sqrt((int)reservation.Vehicle.Brand.Notoriety);
         }
         else
         {
             var endDepot = _context.Depots.FirstOrDefault(r => r.Id == request.DepotId) ?? throw new NotFoundException(nameof(request.DepotId));
-            //var fee = await _context.Fees.FirstOrDefaultAsync(
-            //    f => (f.Depot1Id == reservation.Plan.StartDepotId && f.Depot2Id == reservation.Plan.EndDepotId)
-            //    || (f.Depot1Id == reservation.Plan.EndDepotId && f.Depot2Id == reservation.Plan.StartDepotId)) 
-            //    ?? throw new NotFoundException("no fee found");
 
-            //var endDepotRate = endDepot.Id == reservation.Plan.EndDepotId ? 0.95 : 1.1;
-            //var nbDays = (reservation.EndDate.Date - reservation.StartDate.Date).TotalDays;
-            //price = (int)nbDays * fee.Price * endDepotRate * Math.Sqrt((int)reservation.Vehicle.Brand.Notoriety);
             reservation.Plan.EndDepot = endDepot;
         }
-        reservation.Price = price;
+        reservation.Price = await _priceCalculation.CalculReservationPriceAsync(_mapper.Map<PriceReservationCalculModel>(reservation), Math.Max(request.NbKilometers, request.DepotId));
         reservation.ReservationStatus = ReservationStatus.Comlpeted;
         await _context.SaveChangesAsync(cancellationToken);
         return await _context.Reservations.ProjectTo<CloseReservationDto>(_mapper.ConfigurationProvider).FirstOrDefaultAsync(f => f.Id == request.ReservationId)

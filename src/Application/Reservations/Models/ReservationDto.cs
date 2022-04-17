@@ -9,7 +9,7 @@ using CleanArchitecture.Domain.Entities;
 using CleanArchitecture.Domain.Enums;
 
 namespace CleanArchitecture.Application.Reservations.Models;
-public class ReservationDto: IMapFrom<Reservation>
+public class ReservationDto: IMapFrom<Reservation>, IPriceReservationCalculModel
 {
     public int Id { get; set; }
     public VehicleDto Vehicle { get; set; }
@@ -20,5 +20,9 @@ public class ReservationDto: IMapFrom<Reservation>
     public PlanType PlanPlanType { get; set; }
     public int PlanStartDepotId { get; set; }
     public int PlanEndDepotId { get; set; }
-    public double? PlanKilometerPrice { get; set; }
+    public double PlanKilometerPrice { get; set; }
+    public double Kilometers { get; set; } = 0;
+    public double PlanBonusRate { get; set; }
+    public CarNotoriety VehicleBrandNotoriety { get; set; }
+    
 }

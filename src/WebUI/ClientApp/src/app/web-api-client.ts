@@ -594,7 +594,7 @@ export class EmployeesClient implements IEmployeesClient {
 export interface IReservationClient {
     getReservationsbyClientId(clientId: number | undefined): Observable<ReservationDto[]>;
     reserveVehicle(command: ReserveVehicleCommand): Observable<boolean>;
-    closeReservation(reservationId: number | undefined, nbKilometers: number | undefined): Observable<CloseReservationDto>;
+    closeReservation(reservationId: number | undefined, endDepotId: number | undefined, nbKilometers: number | undefined): Observable<CloseReservationDto>;
     startReservation(reservationId: number | undefined): Observable<boolean>;
 }
 
@@ -719,16 +719,20 @@ export class ReservationClient implements IReservationClient {
         return _observableOf<boolean>(<any>null);
     }
 
-    closeReservation(reservationId: number | undefined, nbKilometers: number | undefined): Observable<CloseReservationDto> {
+    closeReservation(reservationId: number | undefined, endDepotId: number | undefined, nbKilometers: number | undefined): Observable<CloseReservationDto> {
         let url_ = this.baseUrl + "/api/Reservation/close?";
         if (reservationId === null)
             throw new Error("The parameter 'reservationId' cannot be null.");
         else if (reservationId !== undefined)
             url_ += "reservationId=" + encodeURIComponent("" + reservationId) + "&";
+        if (endDepotId === null)
+            throw new Error("The parameter 'endDepotId' cannot be null.");
+        else if (endDepotId !== undefined)
+            url_ += "endDepotId=" + encodeURIComponent("" + endDepotId) + "&";
         if (nbKilometers === null)
             throw new Error("The parameter 'nbKilometers' cannot be null.");
         else if (nbKilometers !== undefined)
-            url_ += "NbKilometers=" + encodeURIComponent("" + nbKilometers) + "&";
+            url_ += "nbKilometers=" + encodeURIComponent("" + nbKilometers) + "&";
         url_ = url_.replace(/[?&]$/, "");
 
         let options_ : any = {
@@ -739,7 +743,7 @@ export class ReservationClient implements IReservationClient {
             })
         };
 
-        return this.http.request("get", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+        return this.http.request("put", url_, options_).pipe(_observableMergeMap((response_ : any) => {
             return this.processCloseReservation(response_);
         })).pipe(_observableCatch((response_: any) => {
             if (response_ instanceof HttpResponseBase) {
@@ -1573,7 +1577,10 @@ export class ReservationDto implements IReservationDto {
     planPlanType?: PlanType;
     planStartDepotId?: number;
     planEndDepotId?: number;
-    planKilometerPrice?: number | undefined;
+    planKilometerPrice?: number;
+    kilometers?: number;
+    planBonusRate?: number;
+    vehicleBrandNotoriety?: CarNotoriety;
 
     constructor(data?: IReservationDto) {
         if (data) {
@@ -1596,6 +1603,9 @@ export class ReservationDto implements IReservationDto {
             this.planStartDepotId = _data["planStartDepotId"];
             this.planEndDepotId = _data["planEndDepotId"];
             this.planKilometerPrice = _data["planKilometerPrice"];
+            this.kilometers = _data["kilometers"];
+            this.planBonusRate = _data["planBonusRate"];
+            this.vehicleBrandNotoriety = _data["vehicleBrandNotoriety"];
         }
     }
 
@@ -1618,6 +1628,9 @@ export class ReservationDto implements IReservationDto {
         data["planStartDepotId"] = this.planStartDepotId;
         data["planEndDepotId"] = this.planEndDepotId;
         data["planKilometerPrice"] = this.planKilometerPrice;
+        data["kilometers"] = this.kilometers;
+        data["planBonusRate"] = this.planBonusRate;
+        data["vehicleBrandNotoriety"] = this.vehicleBrandNotoriety;
         return data; 
     }
 }
@@ -1632,7 +1645,10 @@ export interface IReservationDto {
     planPlanType?: PlanType;
     planStartDepotId?: number;
     planEndDepotId?: number;
-    planKilometerPrice?: number | undefined;
+    planKilometerPrice?: number;
+    kilometers?: number;
+    planBonusRate?: number;
+    vehicleBrandNotoriety?: CarNotoriety;
 }
 
 export class VehicleDto implements IVehicleDto {
@@ -1733,6 +1749,14 @@ export enum ReservationStatus {
 export enum PlanType {
     Kilometric = 1,
     Fee = 2,
+}
+
+export enum CarNotoriety {
+    Car = 1,
+    Van = 2,
+    Suv = 3,
+    Truck = 4,
+    Luxury = 25,
 }
 
 export class ReserveVehicleCommand implements IReserveVehicleCommand {
@@ -1993,14 +2017,6 @@ export interface IAddVehicleCommand {
     model?: string;
     carNotoriety?: CarNotoriety;
     kilometer?: number;
-}
-
-export enum CarNotoriety {
-    Car = 1,
-    Van = 2,
-    Suv = 3,
-    Truck = 4,
-    Luxury = 25,
 }
 
 export interface FileResponse {

@@ -357,7 +357,7 @@
       }
     },
     "/api/Reservation/close": {
-      "get": {
+      "put": {
         "tags": [
           "Reservation"
         ],
@@ -373,14 +373,23 @@
             "x-position": 1
           },
           {
-            "name": "NbKilometers",
+            "name": "endDepotId",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "x-position": 2
+          },
+          {
+            "name": "nbKilometers",
             "in": "query",
             "schema": {
               "type": "integer",
               "format": "int32",
               "default": 0
             },
-            "x-position": 2
+            "x-position": 3
           }
         ],
         "responses": {
@@ -792,8 +801,18 @@
           },
           "planKilometerPrice": {
             "type": "number",
-            "format": "double",
-            "nullable": true
+            "format": "double"
+          },
+          "kilometers": {
+            "type": "number",
+            "format": "double"
+          },
+          "planBonusRate": {
+            "type": "number",
+            "format": "double"
+          },
+          "vehicleBrandNotoriety": {
+            "$ref": "#/components/schemas/CarNotoriety"
           }
         }
       },
@@ -855,6 +874,24 @@
         "enum": [
           1,
           2
+        ]
+      },
+      "CarNotoriety": {
+        "type": "integer",
+        "description": "",
+        "x-enumNames": [
+          "Car",
+          "van",
+          "Suv",
+          "Truck",
+          "Luxury"
+        ],
+        "enum": [
+          1,
+          2,
+          3,
+          4,
+          25
         ]
       },
       "ReserveVehicleCommand": {
@@ -1002,24 +1039,6 @@
             "format": "double"
           }
         }
-      },
-      "CarNotoriety": {
-        "type": "integer",
-        "description": "",
-        "x-enumNames": [
-          "Car",
-          "van",
-          "Suv",
-          "Truck",
-          "Luxury"
-        ],
-        "enum": [
-          1,
-          2,
-          3,
-          4,
-          25
-        ]
       }
     },
     "securitySchemes": {

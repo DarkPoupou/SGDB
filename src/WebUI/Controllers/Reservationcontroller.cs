@@ -16,10 +16,10 @@ public class ReservationController : ApiControllerBase
     {
         return await Mediator.Send(command);
     }
-    [HttpGet("close")]
-    public async Task<ActionResult<CloseReservationDto>> CloseReservation(int reservationId, int NbKilometers = 0)
+    [HttpPut("close")]
+    public async Task<ActionResult<CloseReservationDto>> CloseReservation(int reservationId, int endDepotId, int nbKilometers = 0)
     {
-        return await Mediator.Send(new CloseReservationCommand { NbKilometers = NbKilometers, ReservationId = reservationId });
+        return await Mediator.Send(new CloseReservationCommand { NbKilometers = nbKilometers, DepotId = endDepotId, ReservationId = reservationId });
     }
     [HttpPut("start")]
     public async Task<ActionResult<bool>> StartReservation(int reservationId)

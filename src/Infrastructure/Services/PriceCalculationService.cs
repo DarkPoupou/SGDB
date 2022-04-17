@@ -35,7 +35,7 @@ public class PriceCalculationService : IPriceCalculationService
     public async Task<double> CalculReservationPriceAsync(IPriceReservationCalculModel reservation, double additionalPlanTypeParameter)
     {
         if (reservation.PlanPlanType == PlanType.Kilometric)
-            return KilometricPriceCalcul(reservation.PlanKilometerPrice, additionalPlanTypeParameter, reservation.VehicleBrandNotoriety);            
+            return KilometricPriceCalcul(reservation.PlanKilometerPrice, additionalPlanTypeParameter, reservation.VehicleBrandNotoriety, reservation.PlanBonusRate);            
         
         var fee = await _context.Fees.AsNoTracking().FirstOrDefaultAsync(
             f => (f.Depot1Id == reservation.PlanStartDepotId && f.Depot2Id == reservation.PlanEndDepotId)
@@ -43,12 +43,12 @@ public class PriceCalculationService : IPriceCalculationService
             ?? throw new NotFoundException("no fee found");
 
         var nbDays = (reservation.EndDate.Date - reservation.StartDate.Date).TotalDays;
-        return FeePriceCalcul(additionalPlanTypeParameter == reservation.PlanEndDepotId, (int)nbDays, fee.Price,reservation.VehicleBrandNotoriety);        
+        return FeePriceCalcul(additionalPlanTypeParameter == reservation.PlanEndDepotId, (int)nbDays, fee.Price,reservation.VehicleBrandNotoriety, reservation.PlanBonusRate);        
     }
-    public double FeePriceCalcul(bool isCorrectEndDepot, int nbDays, double feePrice, CarNotoriety notoriety)
-        => (isCorrectEndDepot? 0.95 : 1.1) * nbDays * feePrice * CalculCarCoefficient(notoriety);
-    public double KilometricPriceCalcul(double priceKilometer, double kilometers, CarNotoriety notoriety)                                                                          
-        => priceKilometer * kilometers * CalculCarCoefficient(notoriety);
+    public double FeePriceCalcul(bool isCorrectEndDepot, int nbDays, double feePrice, CarNotoriety notoriety, double bonnusRate)
+        => (isCorrectEndDepot ? 0.95 : 1.1) * Math.Max(nbDays, 1) * feePrice * CalculCarCoefficient(notoriety) * (bonnusRate <= 0 ? 1 : bonnusRate);
+    public double KilometricPriceCalcul(double priceKilometer, double kilometers, CarNotoriety notoriety, double bonnusRate)                                                                          
+        => priceKilometer * kilometers * CalculCarCoefficient(notoriety) * bonnusRate;
     private static double CalculCarCoefficient(CarNotoriety notoriety)
         => Math.Sqrt((int)notoriety);
 }
