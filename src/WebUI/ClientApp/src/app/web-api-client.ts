@@ -1520,7 +1520,7 @@ export class ReservationDto implements IReservationDto {
     planPlanType?: PlanType;
     planStartDepotId?: number;
     planEndDepotId?: number;
-    planKilometerPrice?: number;
+    planKilometerPrice?: number | undefined;
 
     constructor(data?: IReservationDto) {
         if (data) {
@@ -1579,7 +1579,7 @@ export interface IReservationDto {
     planPlanType?: PlanType;
     planStartDepotId?: number;
     planEndDepotId?: number;
-    planKilometerPrice?: number;
+    planKilometerPrice?: number | undefined;
 }
 
 export class VehicleDto implements IVehicleDto {
