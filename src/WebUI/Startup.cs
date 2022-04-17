@@ -92,7 +92,7 @@ public class Startup
 
         app.UseRouting();
 
-        app.UseCors(builder => builder.WithOrigins("http://localhost:3000").AllowAnyMethod().AllowAnyHeader());
+        app.UseCors(builder => builder.WithOrigins("http://localhost:3000", "http://localhost:3001").AllowAnyMethod().AllowAnyHeader());
 
         app.UseAuthentication();
         app.UseAuthorization();

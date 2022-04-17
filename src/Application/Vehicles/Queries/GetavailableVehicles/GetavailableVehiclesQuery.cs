@@ -33,8 +33,10 @@ public class GetavailableVehiclesQueryHandler : IRequestHandler<GetavailableVehi
     }
     public async Task<IEnumerable<VehicleDto>> Handle(GetavailableVehiclesQuery request, CancellationToken cancellationToken)
     {
-        return await _context.Vehicles.Where(v => v.DepotId == request.DepotId && 
-            !v.Reservations.HasBookedReservation(request.StartDate, request.EndDate))
+        return await _context.Vehicles.Where(v => !v.Reservations.Any(r => ((r.ReservationStatus == ReservationStatus.Booked || r.ReservationStatus == ReservationStatus.Pending)
+            && (r.EndDate.Date >= DateTime.Now.Date)
+            && !(request.StartDate > r.EndDate || request.EndDate < r.StartDate)))
+            && v.DepotId == request.DepotId)
         .ProjectTo<VehicleDto>(_mapper.ConfigurationProvider)
         .ToListAsync(cancellationToken);
     }

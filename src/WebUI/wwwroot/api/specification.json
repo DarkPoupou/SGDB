@@ -578,7 +578,7 @@
             "type": "integer",
             "format": "int32"
           },
-          "lastName": {
+          "lastname": {
             "type": "string"
           },
           "firstname": {
@@ -766,6 +766,10 @@
           "planEndDepotId": {
             "type": "integer",
             "format": "int32"
+          },
+          "planKilometerPrice": {
+            "type": "number",
+            "format": "double"
           }
         }
       },

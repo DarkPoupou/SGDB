@@ -1092,7 +1092,7 @@ export class VehiclesClient implements IVehiclesClient {
 
 export class ClientDto implements IClientDto {
     id?: number;
-    lastName?: string;
+    lastname?: string;
     firstname?: string;
     email?: string;
 
@@ -1108,7 +1108,7 @@ export class ClientDto implements IClientDto {
     init(_data?: any) {
         if (_data) {
             this.id = _data["id"];
-            this.lastName = _data["lastName"];
+            this.lastname = _data["lastname"];
             this.firstname = _data["firstname"];
             this.email = _data["email"];
         }
@@ -1124,7 +1124,7 @@ export class ClientDto implements IClientDto {
     toJSON(data?: any) {
         data = typeof data === 'object' ? data : {};
         data["id"] = this.id;
-        data["lastName"] = this.lastName;
+        data["lastname"] = this.lastname;
         data["firstname"] = this.firstname;
         data["email"] = this.email;
         return data; 
@@ -1133,7 +1133,7 @@ export class ClientDto implements IClientDto {
 
 export interface IClientDto {
     id?: number;
-    lastName?: string;
+    lastname?: string;
     firstname?: string;
     email?: string;
 }
@@ -1520,6 +1520,7 @@ export class ReservationDto implements IReservationDto {
     planPlanType?: PlanType;
     planStartDepotId?: number;
     planEndDepotId?: number;
+    planKilometerPrice?: number;
 
     constructor(data?: IReservationDto) {
         if (data) {
@@ -1541,6 +1542,7 @@ export class ReservationDto implements IReservationDto {
             this.planPlanType = _data["planPlanType"];
             this.planStartDepotId = _data["planStartDepotId"];
             this.planEndDepotId = _data["planEndDepotId"];
+            this.planKilometerPrice = _data["planKilometerPrice"];
         }
     }
 
@@ -1562,6 +1564,7 @@ export class ReservationDto implements IReservationDto {
         data["planPlanType"] = this.planPlanType;
         data["planStartDepotId"] = this.planStartDepotId;
         data["planEndDepotId"] = this.planEndDepotId;
+        data["planKilometerPrice"] = this.planKilometerPrice;
         return data; 
     }
 }
@@ -1576,6 +1579,7 @@ export interface IReservationDto {
     planPlanType?: PlanType;
     planStartDepotId?: number;
     planEndDepotId?: number;
+    planKilometerPrice?: number;
 }
 
 export class VehicleDto implements IVehicleDto {

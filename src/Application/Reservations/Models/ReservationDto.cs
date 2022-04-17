@@ -20,4 +20,5 @@ public class ReservationDto: IMapFrom<Reservation>
     public PlanType PlanPlanType { get; set; }
     public int PlanStartDepotId { get; set; }
     public int PlanEndDepotId { get; set; }
+    public double PlanKilometerPrice { get; set; }
 }
