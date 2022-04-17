@@ -13,7 +13,7 @@ using Microsoft.EntityFrameworkCore;
 namespace CleanArchitecture.Application.Vehicles.Queries;
 public class GetVehiclesByDepotQuery: IRequest<IEnumerable<VehicleDto>>
 {
-    public int DepotId { get; set; }
+    public int DepotId { get; set; } = 0;
 }
 public class GetVehiclesByDepotQueryHandler : IRequestHandler<GetVehiclesByDepotQuery, IEnumerable<VehicleDto>>
 {
@@ -27,6 +27,7 @@ public class GetVehiclesByDepotQueryHandler : IRequestHandler<GetVehiclesByDepot
     }
     public async Task<IEnumerable<VehicleDto>> Handle(GetVehiclesByDepotQuery request, CancellationToken cancellationToken)
     {
-        return await _context.Vehicles.Where(v => v.DepotId == request.DepotId).ProjectTo<VehicleDto>(_mapper.ConfigurationProvider).ToListAsync(cancellationToken);
+        return await _context.Vehicles
+            .Where(v => request.DepotId<= 0 || v.DepotId == request.DepotId).ProjectTo<VehicleDto>(_mapper.ConfigurationProvider).ToListAsync(cancellationToken);
     }
 }

@@ -451,12 +451,12 @@
         }
       }
     },
-    "/api/Vehicles": {
+    "/api/Vehicles/available": {
       "get": {
         "tags": [
           "Vehicles"
         ],
-        "operationId": "Vehicles_GetavailableVehiclesAll",
+        "operationId": "Vehicles_GetavailableVehicles",
         "parameters": [
           {
             "name": "startDate",
@@ -501,6 +501,63 @@
             }
           }
         }
+      }
+    },
+    "/api/Vehicles/depot": {
+      "get": {
+        "tags": [
+          "Vehicles"
+        ],
+        "operationId": "Vehicles_GetVehiclesByDepot",
+        "parameters": [
+          {
+            "name": "depotId",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "x-position": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/VehicleDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Vehicles": {
+      "get": {
+        "tags": [
+          "Vehicles"
+        ],
+        "operationId": "Vehicles_GetVehicles",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/VehicleDto"
+                  }
+                }
+              }
+            }
+          }
+        }
       },
       "post": {
         "tags": [
@@ -526,40 +583,6 @@
               "application/json": {
                 "schema": {
                   "type": "boolean"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/Vehicles/depot": {
-      "get": {
-        "tags": [
-          "Vehicles"
-        ],
-        "operationId": "Vehicles_GetavailableVehicles",
-        "parameters": [
-          {
-            "name": "depotId",
-            "in": "query",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            },
-            "x-position": 1
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/VehicleDto"
-                  }
                 }
               }
             }
