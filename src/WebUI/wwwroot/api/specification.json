@@ -111,6 +111,36 @@
             }
           }
         }
+      },
+      "post": {
+        "tags": [
+          "Depots"
+        ],
+        "operationId": "Depots_CreateDepot",
+        "requestBody": {
+          "x-name": "command",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddDepotCommand"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 1
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/api/Depots/byId": {
@@ -675,6 +705,25 @@
           }
         }
       },
+      "AddDepotCommand": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "address": {
+            "type": "string"
+          },
+          "city": {
+            "type": "string"
+          },
+          "countryId": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
       "EmployeeDto": {
         "type": "object",
         "additionalProperties": false,
@@ -683,7 +732,7 @@
             "type": "integer",
             "format": "int32"
           },
-          "lastName": {
+          "lastname": {
             "type": "string"
           },
           "firstname": {
@@ -702,7 +751,7 @@
             "type": "integer",
             "format": "int32"
           },
-          "lastName": {
+          "lastname": {
             "type": "string"
           },
           "firstname": {

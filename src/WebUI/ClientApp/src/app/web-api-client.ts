@@ -190,6 +190,7 @@ export class ClientsClient implements IClientsClient {
 
 export interface IDepotsClient {
     getDepots(): Observable<DepotDto[]>;
+    createDepot(command: AddDepotCommand): Observable<boolean>;
     getDepotById(depotId: number | undefined): Observable<DepotDto>;
 }
 
@@ -256,6 +257,58 @@ export class DepotsClient implements IDepotsClient {
             }));
         }
         return _observableOf<DepotDto[]>(<any>null);
+    }
+
+    createDepot(command: AddDepotCommand): Observable<boolean> {
+        let url_ = this.baseUrl + "/api/Depots";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(command);
+
+        let options_ : any = {
+            body: content_,
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            })
+        };
+
+        return this.http.request("post", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processCreateDepot(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processCreateDepot(<any>response_);
+                } catch (e) {
+                    return <Observable<boolean>><any>_observableThrow(e);
+                }
+            } else
+                return <Observable<boolean>><any>_observableThrow(response_);
+        }));
+    }
+
+    protected processCreateDepot(response: HttpResponseBase): Observable<boolean> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (<any>response).error instanceof Blob ? (<any>response).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = resultData200 !== undefined ? resultData200 : <any>null;
+            return _observableOf(result200);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf<boolean>(<any>null);
     }
 
     getDepotById(depotId: number | undefined): Observable<DepotDto> {
@@ -1335,9 +1388,57 @@ export interface ICountryNameDto {
     name?: string;
 }
 
+export class AddDepotCommand implements IAddDepotCommand {
+    name?: string;
+    address?: string;
+    city?: string;
+    countryId?: number;
+
+    constructor(data?: IAddDepotCommand) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.name = _data["name"];
+            this.address = _data["address"];
+            this.city = _data["city"];
+            this.countryId = _data["countryId"];
+        }
+    }
+
+    static fromJS(data: any): AddDepotCommand {
+        data = typeof data === 'object' ? data : {};
+        let result = new AddDepotCommand();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["name"] = this.name;
+        data["address"] = this.address;
+        data["city"] = this.city;
+        data["countryId"] = this.countryId;
+        return data; 
+    }
+}
+
+export interface IAddDepotCommand {
+    name?: string;
+    address?: string;
+    city?: string;
+    countryId?: number;
+}
+
 export class EmployeeDto implements IEmployeeDto {
     id?: number;
-    lastName?: string;
+    lastname?: string;
     firstname?: string;
     email?: string;
 
@@ -1353,7 +1454,7 @@ export class EmployeeDto implements IEmployeeDto {
     init(_data?: any) {
         if (_data) {
             this.id = _data["id"];
-            this.lastName = _data["lastName"];
+            this.lastname = _data["lastname"];
             this.firstname = _data["firstname"];
             this.email = _data["email"];
         }
@@ -1369,7 +1470,7 @@ export class EmployeeDto implements IEmployeeDto {
     toJSON(data?: any) {
         data = typeof data === 'object' ? data : {};
         data["id"] = this.id;
-        data["lastName"] = this.lastName;
+        data["lastname"] = this.lastname;
         data["firstname"] = this.firstname;
         data["email"] = this.email;
         return data; 
@@ -1378,14 +1479,14 @@ export class EmployeeDto implements IEmployeeDto {
 
 export interface IEmployeeDto {
     id?: number;
-    lastName?: string;
+    lastname?: string;
     firstname?: string;
     email?: string;
 }
 
 export class EmployeeRoleDto implements IEmployeeRoleDto {
     id?: number;
-    lastName?: string;
+    lastname?: string;
     firstname?: string;
     email?: string;
     roleDto?: RoleDto;
@@ -1402,7 +1503,7 @@ export class EmployeeRoleDto implements IEmployeeRoleDto {
     init(_data?: any) {
         if (_data) {
             this.id = _data["id"];
-            this.lastName = _data["lastName"];
+            this.lastname = _data["lastname"];
             this.firstname = _data["firstname"];
             this.email = _data["email"];
             this.roleDto = _data["roleDto"] ? RoleDto.fromJS(_data["roleDto"]) : <any>undefined;
@@ -1419,7 +1520,7 @@ export class EmployeeRoleDto implements IEmployeeRoleDto {
     toJSON(data?: any) {
         data = typeof data === 'object' ? data : {};
         data["id"] = this.id;
-        data["lastName"] = this.lastName;
+        data["lastname"] = this.lastname;
         data["firstname"] = this.firstname;
         data["email"] = this.email;
         data["roleDto"] = this.roleDto ? this.roleDto.toJSON() : <any>undefined;
@@ -1429,7 +1530,7 @@ export class EmployeeRoleDto implements IEmployeeRoleDto {
 
 export interface IEmployeeRoleDto {
     id?: number;
-    lastName?: string;
+    lastname?: string;
     firstname?: string;
     email?: string;
     roleDto?: RoleDto;

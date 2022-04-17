@@ -1,4 +1,5 @@
-﻿using CleanArchitecture.Application.Depots.Models;
+﻿using CleanArchitecture.Application.Depots.Commands;
+using CleanArchitecture.Application.Depots.Models;
 using CleanArchitecture.Application.Depots.Queries;
 using Microsoft.AspNetCore.Mvc;
 
@@ -14,5 +15,10 @@ public class DepotsController : ApiControllerBase
     public async Task<ActionResult<DepotDto>> GetDepotById(int depotId)
     {
         return await Mediator.Send(new GetDepotByIdQuery() { DepotId = depotId });
+    }
+    [HttpPost]
+    public async Task<bool> CreateDepot(AddDepotCommand command)
+    {
+        return await Mediator.Send(command);
     }
 }
