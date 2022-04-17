@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using CleanArchitecture.Application.Common.Exceptions;
 using CleanArchitecture.Application.Common.Interfaces;
 using CleanArchitecture.Application.Reservations.Models;
+using CleanArchitecture.Domain.Entities;
 using CleanArchitecture.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 
@@ -22,7 +23,7 @@ public class PriceCalculationService : IPriceCalculationService
     }
     public double CalculateBonus(DateTime startDate)
     {
-        if (startDate < DateTime.Now)
+        if (startDate.Date < DateTime.Now.Date)
             throw new ValidationException();
 
         var diff = startDate.Date - _dateTime.Now.Date;
@@ -46,7 +47,7 @@ public class PriceCalculationService : IPriceCalculationService
     }
     public double FeePriceCalcul(bool isCorrectEndDepot, int nbDays, double feePrice, CarNotoriety notoriety)
         => (isCorrectEndDepot? 0.95 : 1.1) * nbDays * feePrice * CalculCarCoefficient(notoriety);
-    public double KilometricPriceCalcul(double priceKilometer, double kilometers, CarNotoriety notoriety)
+    public double KilometricPriceCalcul(double priceKilometer, double kilometers, CarNotoriety notoriety)                                                                          
         => priceKilometer * kilometers * CalculCarCoefficient(notoriety);
     private static double CalculCarCoefficient(CarNotoriety notoriety)
         => Math.Sqrt((int)notoriety);

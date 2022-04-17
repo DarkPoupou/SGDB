@@ -30,7 +30,7 @@ public class GetClientReservationsQueryHandler : IRequestHandler<GetClientReserv
     }
     public async Task<IEnumerable<ReservationDto>> Handle(GetClientReservationsQuery request, CancellationToken cancellationToken)
     {
-        var r = await _context.Reservations.Where(r => r.Client.Id == request.ClientId).OrderByDescending(r => r.StartDate)
+        var r = await _context.Reservations.Where(r => r.Client.Id == request.ClientId).OrderByDescending(r => r.EndDate)
             .ProjectTo<ReservationDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
 
@@ -38,7 +38,7 @@ public class GetClientReservationsQueryHandler : IRequestHandler<GetClientReserv
         {
             if(reservation.Price == 0 && reservation.PlanPlanType == PlanType.Fee)
             {
-                reservation.Price = await _priceCalculation.CalculReservationPriceAsync(_mapper.Map<IPriceReservationCalculModel>(reservation), reservation.PlanEndDepotId);
+                reservation.Price = await _priceCalculation.CalculReservationPriceAsync(_mapper.Map<PriceReservationCalculModel>(reservation), reservation.PlanEndDepotId);
             }
         }
         return r;

@@ -21,7 +21,7 @@ public interface IPriceReservationCalculModel
     PlanType PlanPlanType { get; set; }
 }
 
-public class PriceReservationCalculModel : IMapFrom<Reservation>, IPriceReservationCalculModel
+public class PriceReservationCalculModel : IMapFrom<ReservationDto>, IPriceReservationCalculModel
 {
     public DateTime StartDate { get; set; }
     public DateTime EndDate { get; set; }

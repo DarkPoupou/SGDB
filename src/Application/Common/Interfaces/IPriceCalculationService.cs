@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using CleanArchitecture.Application.Reservations.Models;
+using CleanArchitecture.Domain.Entities;
 using CleanArchitecture.Domain.Enums;
 
 namespace CleanArchitecture.Application.Common.Interfaces;
