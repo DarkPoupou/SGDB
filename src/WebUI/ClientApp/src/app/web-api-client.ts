@@ -644,11 +644,196 @@ export class EmployeesClient implements IEmployeesClient {
     }
 }
 
+export interface IFeesClient {
+    getFeesAll(): Observable<FeeDto[]>;
+    getFees(depotId: number | undefined): Observable<FeeDto[]>;
+    isFeeBetweenDepots(depot1Id: number | undefined, depot2Id: number | undefined): Observable<FeeDto>;
+}
+
+@Injectable({
+    providedIn: 'root'
+})
+export class FeesClient implements IFeesClient {
+    private http: HttpClient;
+    private baseUrl: string;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
+
+    constructor(@Inject(HttpClient) http: HttpClient, @Optional() @Inject(API_BASE_URL) baseUrl?: string) {
+        this.http = http;
+        this.baseUrl = baseUrl !== undefined && baseUrl !== null ? baseUrl : "";
+    }
+
+    getFeesAll(): Observable<FeeDto[]> {
+        let url_ = this.baseUrl + "/api/Fees";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Accept": "application/json"
+            })
+        };
+
+        return this.http.request("get", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processGetFeesAll(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processGetFeesAll(<any>response_);
+                } catch (e) {
+                    return <Observable<FeeDto[]>><any>_observableThrow(e);
+                }
+            } else
+                return <Observable<FeeDto[]>><any>_observableThrow(response_);
+        }));
+    }
+
+    protected processGetFeesAll(response: HttpResponseBase): Observable<FeeDto[]> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (<any>response).error instanceof Blob ? (<any>response).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            if (Array.isArray(resultData200)) {
+                result200 = [] as any;
+                for (let item of resultData200)
+                    result200!.push(FeeDto.fromJS(item));
+            }
+            return _observableOf(result200);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf<FeeDto[]>(<any>null);
+    }
+
+    getFees(depotId: number | undefined): Observable<FeeDto[]> {
+        let url_ = this.baseUrl + "/api/Fees/depotId?";
+        if (depotId === null)
+            throw new Error("The parameter 'depotId' cannot be null.");
+        else if (depotId !== undefined)
+            url_ += "depotId=" + encodeURIComponent("" + depotId) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Accept": "application/json"
+            })
+        };
+
+        return this.http.request("get", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processGetFees(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processGetFees(<any>response_);
+                } catch (e) {
+                    return <Observable<FeeDto[]>><any>_observableThrow(e);
+                }
+            } else
+                return <Observable<FeeDto[]>><any>_observableThrow(response_);
+        }));
+    }
+
+    protected processGetFees(response: HttpResponseBase): Observable<FeeDto[]> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (<any>response).error instanceof Blob ? (<any>response).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            if (Array.isArray(resultData200)) {
+                result200 = [] as any;
+                for (let item of resultData200)
+                    result200!.push(FeeDto.fromJS(item));
+            }
+            return _observableOf(result200);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf<FeeDto[]>(<any>null);
+    }
+
+    isFeeBetweenDepots(depot1Id: number | undefined, depot2Id: number | undefined): Observable<FeeDto> {
+        let url_ = this.baseUrl + "/api/Fees/EnsureExist?";
+        if (depot1Id === null)
+            throw new Error("The parameter 'depot1Id' cannot be null.");
+        else if (depot1Id !== undefined)
+            url_ += "depot1Id=" + encodeURIComponent("" + depot1Id) + "&";
+        if (depot2Id === null)
+            throw new Error("The parameter 'depot2Id' cannot be null.");
+        else if (depot2Id !== undefined)
+            url_ += "depot2Id=" + encodeURIComponent("" + depot2Id) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Accept": "application/json"
+            })
+        };
+
+        return this.http.request("get", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processIsFeeBetweenDepots(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processIsFeeBetweenDepots(<any>response_);
+                } catch (e) {
+                    return <Observable<FeeDto>><any>_observableThrow(e);
+                }
+            } else
+                return <Observable<FeeDto>><any>_observableThrow(response_);
+        }));
+    }
+
+    protected processIsFeeBetweenDepots(response: HttpResponseBase): Observable<FeeDto> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (<any>response).error instanceof Blob ? (<any>response).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = FeeDto.fromJS(resultData200);
+            return _observableOf(result200);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf<FeeDto>(<any>null);
+    }
+}
+
 export interface IReservationClient {
     getReservationsbyClientId(clientId: number | undefined): Observable<ReservationDto[]>;
     reserveVehicle(command: ReserveVehicleCommand): Observable<boolean>;
     closeReservation(reservationId: number | undefined, endDepotId: number | undefined, nbKilometers: number | undefined): Observable<CloseReservationDto>;
     startReservation(reservationId: number | undefined): Observable<boolean>;
+    cancelReservation(reservationId: number | undefined): Observable<boolean>;
 }
 
 @Injectable({
@@ -863,6 +1048,58 @@ export class ReservationClient implements IReservationClient {
     }
 
     protected processStartReservation(response: HttpResponseBase): Observable<boolean> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (<any>response).error instanceof Blob ? (<any>response).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = resultData200 !== undefined ? resultData200 : <any>null;
+            return _observableOf(result200);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf<boolean>(<any>null);
+    }
+
+    cancelReservation(reservationId: number | undefined): Observable<boolean> {
+        let url_ = this.baseUrl + "/api/Reservation/Cancel?";
+        if (reservationId === null)
+            throw new Error("The parameter 'reservationId' cannot be null.");
+        else if (reservationId !== undefined)
+            url_ += "reservationId=" + encodeURIComponent("" + reservationId) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Accept": "application/json"
+            })
+        };
+
+        return this.http.request("put", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processCancelReservation(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processCancelReservation(<any>response_);
+                } catch (e) {
+                    return <Observable<boolean>><any>_observableThrow(e);
+                }
+            } else
+                return <Observable<boolean>><any>_observableThrow(response_);
+        }));
+    }
+
+    protected processCancelReservation(response: HttpResponseBase): Observable<boolean> {
         const status = response.status;
         const responseBlob =
             response instanceof HttpResponse ? response.body :
@@ -1666,6 +1903,54 @@ export interface IUpdateEmployeeCommand {
     firstname?: string;
     lastname?: string;
     mail?: string;
+}
+
+export class FeeDto implements IFeeDto {
+    id?: number;
+    depot1Id?: number;
+    depot2Id?: number;
+    price?: number;
+
+    constructor(data?: IFeeDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.id = _data["id"];
+            this.depot1Id = _data["depot1Id"];
+            this.depot2Id = _data["depot2Id"];
+            this.price = _data["price"];
+        }
+    }
+
+    static fromJS(data: any): FeeDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new FeeDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id;
+        data["depot1Id"] = this.depot1Id;
+        data["depot2Id"] = this.depot2Id;
+        data["price"] = this.price;
+        return data; 
+    }
+}
+
+export interface IFeeDto {
+    id?: number;
+    depot1Id?: number;
+    depot2Id?: number;
+    price?: number;
 }
 
 export class ReservationDto implements IReservationDto {

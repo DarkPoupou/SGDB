@@ -9,19 +9,19 @@ using CleanArchitecture.Domain.Enums;
 using MediatR;
 
 namespace CleanArchitecture.Application.Reservations.Commands;
-public class CancelReservationQuery: IRequest<bool>
+public class CancelReservationCommand: IRequest<bool>
 {
     public int ReersvationId { get; set; }
 }
-public class CancelReservationQueryHandler : IRequestHandler<CancelReservationQuery, bool>
+public class CancelReservationCommandHandler : IRequestHandler<CancelReservationCommand, bool>
 {
     private readonly IApplicationDbContext _context;
 
-    public CancelReservationQueryHandler(IApplicationDbContext context)
+    public CancelReservationCommandHandler(IApplicationDbContext context)
     {
         _context = context;
     }
-    public async Task<bool> Handle(CancelReservationQuery request, CancellationToken cancellationToken)
+    public async Task<bool> Handle(CancelReservationCommand request, CancellationToken cancellationToken)
     {
         var reservation = await _context.Reservations.FindAsync(request.ReersvationId)
             ?? throw new NotFoundException();

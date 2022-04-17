@@ -320,6 +320,103 @@
         }
       }
     },
+    "/api/Fees": {
+      "get": {
+        "tags": [
+          "Fees"
+        ],
+        "operationId": "Fees_GetFeesAll",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/FeeDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Fees/depotId": {
+      "get": {
+        "tags": [
+          "Fees"
+        ],
+        "operationId": "Fees_GetFees",
+        "parameters": [
+          {
+            "name": "depotId",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "x-position": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/FeeDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Fees/EnsureExist": {
+      "get": {
+        "tags": [
+          "Fees"
+        ],
+        "operationId": "Fees_IsFeeBetweenDepots",
+        "parameters": [
+          {
+            "name": "depot1Id",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "x-position": 1
+          },
+          {
+            "name": "depot2Id",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "x-position": 2
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FeeDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/Reservation/Id": {
       "get": {
         "tags": [
@@ -442,6 +539,37 @@
           "Reservation"
         ],
         "operationId": "Reservation_StartReservation",
+        "parameters": [
+          {
+            "name": "reservationId",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "x-position": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Reservation/Cancel": {
+      "put": {
+        "tags": [
+          "Reservation"
+        ],
+        "operationId": "Reservation_CancelReservation",
         "parameters": [
           {
             "name": "reservationId",
@@ -808,6 +936,28 @@
           },
           "mail": {
             "type": "string"
+          }
+        }
+      },
+      "FeeDto": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "depot1Id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "depot2Id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "price": {
+            "type": "number",
+            "format": "double"
           }
         }
       },
