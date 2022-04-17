@@ -9,8 +9,6 @@ public class Vehicle
     [MaxLength(50)]
     public string Immatriculation { get; set; }
     public double Kilometer { get; set; }
-    //public Notoriety Notoriety { get; set; }
-    //public int NotorietyId { get; set; }
     public Brand Brand { get; set; }
     public int BrandId { get; set; }
     public Depot Depot { get; set; }

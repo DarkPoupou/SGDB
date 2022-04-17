@@ -13,9 +13,6 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
     public ApplicationDbContext(
         DbContextOptions<ApplicationDbContext> options) : base(options){ }
 
-    public DbSet<TodoList> TodoLists => Set<TodoList>();
-
-    public DbSet<TodoItem> TodoItems => Set<TodoItem>();
     public DbSet<Employee> Employees => Set<Employee>();
     public DbSet<Role> Roles => Set<Role>();
     public DbSet<Reservation> Reservations => Set<Reservation>();
