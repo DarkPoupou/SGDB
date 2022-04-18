@@ -18,6 +18,7 @@ export interface IClientsClient {
     getClients(): Observable<ClientDto[]>;
     createClient(command: AddClientCommand): Observable<boolean>;
     getClientByEmail(email: string | null | undefined): Observable<ClientDto>;
+    getClientById(clientId: number | undefined): Observable<ClientDto>;
 }
 
 @Injectable({
@@ -166,6 +167,58 @@ export class ClientsClient implements IClientsClient {
     }
 
     protected processGetClientByEmail(response: HttpResponseBase): Observable<ClientDto> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (<any>response).error instanceof Blob ? (<any>response).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = ClientDto.fromJS(resultData200);
+            return _observableOf(result200);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf<ClientDto>(<any>null);
+    }
+
+    getClientById(clientId: number | undefined): Observable<ClientDto> {
+        let url_ = this.baseUrl + "/api/Clients/Id?";
+        if (clientId === null)
+            throw new Error("The parameter 'clientId' cannot be null.");
+        else if (clientId !== undefined)
+            url_ += "clientId=" + encodeURIComponent("" + clientId) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Accept": "application/json"
+            })
+        };
+
+        return this.http.request("get", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processGetClientById(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processGetClientById(<any>response_);
+                } catch (e) {
+                    return <Observable<ClientDto>><any>_observableThrow(e);
+                }
+            } else
+                return <Observable<ClientDto>><any>_observableThrow(response_);
+        }));
+    }
+
+    protected processGetClientById(response: HttpResponseBase): Observable<ClientDto> {
         const status = response.status;
         const responseBlob =
             response instanceof HttpResponse ? response.body :
@@ -1558,7 +1611,7 @@ export interface IClientDto {
 export class AddClientCommand implements IAddClientCommand {
     lastname?: string;
     firstname?: string;
-    eMail?: string;
+    email?: string;
 
     constructor(data?: IAddClientCommand) {
         if (data) {
@@ -1573,7 +1626,7 @@ export class AddClientCommand implements IAddClientCommand {
         if (_data) {
             this.lastname = _data["lastname"];
             this.firstname = _data["firstname"];
-            this.eMail = _data["eMail"];
+            this.email = _data["email"];
         }
     }
 
@@ -1588,7 +1641,7 @@ export class AddClientCommand implements IAddClientCommand {
         data = typeof data === 'object' ? data : {};
         data["lastname"] = this.lastname;
         data["firstname"] = this.firstname;
-        data["eMail"] = this.eMail;
+        data["email"] = this.email;
         return data; 
     }
 }
@@ -1596,7 +1649,7 @@ export class AddClientCommand implements IAddClientCommand {
 export interface IAddClientCommand {
     lastname?: string;
     firstname?: string;
-    eMail?: string;
+    email?: string;
 }
 
 export class CountryDto implements ICountryDto {
@@ -1926,7 +1979,7 @@ export interface IRoleDto {
 export class CreateEmployeeCommand implements ICreateEmployeeCommand {
     firstname?: string;
     lastname?: string;
-    mail?: string;
+    email?: string;
     password?: string;
 
     constructor(data?: ICreateEmployeeCommand) {
@@ -1942,7 +1995,7 @@ export class CreateEmployeeCommand implements ICreateEmployeeCommand {
         if (_data) {
             this.firstname = _data["firstname"];
             this.lastname = _data["lastname"];
-            this.mail = _data["mail"];
+            this.email = _data["email"];
             this.password = _data["password"];
         }
     }
@@ -1958,7 +2011,7 @@ export class CreateEmployeeCommand implements ICreateEmployeeCommand {
         data = typeof data === 'object' ? data : {};
         data["firstname"] = this.firstname;
         data["lastname"] = this.lastname;
-        data["mail"] = this.mail;
+        data["email"] = this.email;
         data["password"] = this.password;
         return data; 
     }
@@ -1967,7 +2020,7 @@ export class CreateEmployeeCommand implements ICreateEmployeeCommand {
 export interface ICreateEmployeeCommand {
     firstname?: string;
     lastname?: string;
-    mail?: string;
+    email?: string;
     password?: string;
 }
 
@@ -1975,7 +2028,7 @@ export class UpdateEmployeeCommand implements IUpdateEmployeeCommand {
     id?: number;
     firstname?: string;
     lastname?: string;
-    mail?: string;
+    email?: string;
 
     constructor(data?: IUpdateEmployeeCommand) {
         if (data) {
@@ -1991,7 +2044,7 @@ export class UpdateEmployeeCommand implements IUpdateEmployeeCommand {
             this.id = _data["id"];
             this.firstname = _data["firstname"];
             this.lastname = _data["lastname"];
-            this.mail = _data["mail"];
+            this.email = _data["email"];
         }
     }
 
@@ -2007,7 +2060,7 @@ export class UpdateEmployeeCommand implements IUpdateEmployeeCommand {
         data["id"] = this.id;
         data["firstname"] = this.firstname;
         data["lastname"] = this.lastname;
-        data["mail"] = this.mail;
+        data["email"] = this.email;
         return data; 
     }
 }
@@ -2016,7 +2069,7 @@ export interface IUpdateEmployeeCommand {
     id?: number;
     firstname?: string;
     lastname?: string;
-    mail?: string;
+    email?: string;
 }
 
 export class FeeDto implements IFeeDto {

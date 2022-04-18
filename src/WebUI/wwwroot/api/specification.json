@@ -90,6 +90,37 @@
         }
       }
     },
+    "/api/Clients/Id": {
+      "get": {
+        "tags": [
+          "Clients"
+        ],
+        "operationId": "Clients_GetClientById",
+        "parameters": [
+          {
+            "name": "clientId",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "x-position": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/Countries": {
       "get": {
         "tags": [
@@ -812,7 +843,7 @@
           "firstname": {
             "type": "string"
           },
-          "eMail": {
+          "email": {
             "type": "string"
           }
         }
@@ -952,7 +983,7 @@
           "lastname": {
             "type": "string"
           },
-          "mail": {
+          "email": {
             "type": "string"
           },
           "password": {
@@ -974,7 +1005,7 @@
           "lastname": {
             "type": "string"
           },
-          "mail": {
+          "email": {
             "type": "string"
           }
         }

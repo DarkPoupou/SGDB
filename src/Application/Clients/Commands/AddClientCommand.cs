@@ -12,7 +12,7 @@ public class AddClientCommand: IRequest<bool>
 {
     public string Lastname { get; set; }
     public string firstname { get; set; }
-    public string EMail { get; set; }
+    public string Email { get; set; }
 }
 public class AddClientCommandHandler : IRequestHandler<AddClientCommand, bool>
 {
@@ -24,7 +24,7 @@ public class AddClientCommandHandler : IRequestHandler<AddClientCommand, bool>
     }
     public async Task<bool> Handle(AddClientCommand request, CancellationToken cancellationToken)
     {
-        Client client = new() { Email = request.EMail, LastName = request.Lastname, Firstname = request.firstname, Password = $"{request.Lastname}.{request.firstname}" };
+        Client client = new() { Email = request.Email, LastName = request.Lastname, Firstname = request.firstname, Password = $"{request.Lastname}.{request.firstname}" };
 
         _context.Clients.Add(client);
         return await _context.SaveChangesAsync(cancellationToken) > 0;
