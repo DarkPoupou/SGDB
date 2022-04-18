@@ -12,7 +12,7 @@ public class CreateEmployeeCommand: IRequest<bool>
 {
     public string Firstname { get; set; }
     public string Lastname { get; set; }
-    public string Mail { get; set; }
+    public string Email { get; set; }
     public string Password { get; set; }
 }
 public class CreateEmployeeCommandHandler : IRequestHandler<CreateEmployeeCommand, bool>
@@ -27,7 +27,7 @@ public class CreateEmployeeCommandHandler : IRequestHandler<CreateEmployeeComman
     {
         Employee employee = new()
         {
-            Email = request.Mail,
+            Email = request.Email,
             Firstname = request.Firstname,
             LastName = request.Lastname,
             Password = request.Password,

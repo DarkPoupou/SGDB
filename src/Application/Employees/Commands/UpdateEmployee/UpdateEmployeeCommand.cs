@@ -14,7 +14,7 @@ public class UpdateEmployeeCommand: IRequest
     public int Id { get; set; }
     public string Firstname { get; set; }
     public string Lastname { get; set; }
-    public string Mail { get; set; }
+    public string Email { get; set; }
 }
 public class UpdateEmployeeCommandHandler : IRequestHandler<UpdateEmployeeCommand>
 {
@@ -31,7 +31,7 @@ public class UpdateEmployeeCommandHandler : IRequestHandler<UpdateEmployeeComman
         var employee = await _context.Employees.FirstOrDefaultAsync(e => e.Id == request.Id);
         employee.Firstname = request.Firstname;
         employee.LastName = request.Lastname;
-        employee.Email = request.Mail;
+        employee.Email = request.Email;
 
         await _context.SaveChangesAsync(cancellationToken);
         return Unit.Value;
