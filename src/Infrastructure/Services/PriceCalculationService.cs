@@ -30,7 +30,7 @@ public class PriceCalculationService : IPriceCalculationService
         var nbWeeks = Math.Max(((int)diff.TotalDays / 7) - 1, 0);
         double bonus = 0.05 * nbWeeks;
         bonus = bonus > 0.2 ? 0.2 : bonus;
-        return bonus;
+        return 1 - bonus;
     }
     public async Task<double> CalculReservationPriceAsync(IPriceReservationCalculModel reservation, double additionalPlanTypeParameter)
     {

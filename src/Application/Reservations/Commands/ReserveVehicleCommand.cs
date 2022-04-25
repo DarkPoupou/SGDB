@@ -44,16 +44,12 @@ public class ReserveVehicleCommandHandler : IRequestHandler<ReserveVehicleComman
 
         Plan plan = new() { StartDepot = startDepot, PlanType = request.PlanType, Reservation = reservation, BonusRate = bonus };
 
-        if (request.PlanType == PlanType.Fee)
-        {
-            var endDepot = await _context.Depots.FirstOrDefaultAsync(d => d.Id == request.EndDepotId.Value) ?? throw new NotFoundException(nameof(request.EndDepotId));
+        if(request.EndDepotId.HasValue && request.EndDepotId.Value > 0)
+            plan.EndDepot = await _context.Depots.FirstOrDefaultAsync(d => d.Id == request.EndDepotId.Value) ?? throw new NotFoundException(nameof(request.EndDepotId));
 
-            plan.EndDepot = endDepot;
-        }
-        else
-        {
+        if (request.PlanType == PlanType.Kilometric)
             plan.KilometerPrice = startDepot.Country.KilometerPrice;
-        }
+
         reservation.Plan = plan;
         reservation.ReservationStatus = request.StartDate.Date == DateTime.Now.Date ? ReservationStatus.Pending : ReservationStatus.Booked;
 
